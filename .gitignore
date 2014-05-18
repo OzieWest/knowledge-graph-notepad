@@ -1,0 +1,5 @@
+/KnowledgeGraph/bin
+/KnowledgeGraph/obj
+/KnowledgeGraph/App_Data
+/KnowledgeGraph/Web.Debug.config
+/KnowledgeGraph/Web.Release.config
