@@ -4,26 +4,46 @@
 
 @section header {
 	<style>
-		body { 
-
+		a {
+			cursor: pointer;
+			text-decoration: none !important;
 		}
 	</style>
 }
 
 <div ng-app="app.page-index" ng-controller="ctrl.page-index">
-	{{ test }}
+	<div class="well well-small" ng-repeat="topic in topics">
+		<h4>
+			<a>{{ topic.Title }}</a>
+		</h4>
+		<div style="font-size: 12px;">
+			<a style="color: green;">{{ topic.Category }}</a>
+			<a style="color: gray;">{{ topic.Created }}</a>
+		</div>
+
+		<div style="margin-top: 10px; font-size: 16px;">{{ topic.Value }}</div>
+
+		<div style="margin-top: 10px; font-size: 12px;">
+			<a><span class="label" style="margin-right: 2px;" ng-repeat="tag in topic.Tags">{{ tag }}</span></a>
+		</div>
+	</div>
 </div>
 
 @section scripts
 {
+	<script src="~/ngApp/app.service.js"></script>
 	<script>
 		'use strict';
 
 		(function(ng, show) {
-			var app = ng.module('app.page-index', []);
+			var app = ng.module('app.page-index', ['app.service']);
 
-			app.controller('ctrl.page-index', function ($scope) {
-				$scope.test = 'Work!';
+			app.controller('ctrl.page-index', function($scope, repoTopics) {
+				$scope.topics = [];
+
+				repoTopics.getAll().then(function (r) {
+					$scope.topics = ng.copy(r);
+				}, show.error);
 
 				show.info('Load complete');
 			});
