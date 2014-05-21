@@ -12,5 +12,15 @@ namespace KnowledgeGraph.Controllers
 		{
 			return View();
 		}
+
+		public ActionResult ViewTopic(string id)
+		{
+			if (string.IsNullOrEmpty(id))
+				return RedirectToAction("Index");
+
+			ViewBag.Id = id;
+
+			return View();
+		}
 	}
 }

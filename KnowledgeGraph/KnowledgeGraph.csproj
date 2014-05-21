@@ -196,15 +196,17 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
-    <Compile Include="Models\TopicModels.cs" />
+    <Compile Include="Models\Topic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-responsive.min.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\img\background0.png" />
     <Content Include="Content\toastr.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="ngApp\app.service.js" />
     <Content Include="Scripts\angular-mocks.js" />
     <Content Include="Scripts\angular-route.min.js" />
     <Content Include="Scripts\angular-sanitize.min.js" />
@@ -260,10 +262,10 @@
     <Content Include="Scripts\underscore-min.map" />
     <Content Include="Scripts\version.json" />
     <Content Include="Scripts\toastr.min.js.map" />
+    <Content Include="Views\Home\ViewTopic.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="ngApp\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

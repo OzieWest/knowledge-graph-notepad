@@ -22,16 +22,16 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		// GET api/topic
-		public IEnumerable<TopicModels> Get(int count = 10, int offset = 0)
+		public IEnumerable<Topic> Get()
 		{
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
 				using (var _session = _store.OpenSession())
 				{
-					var _result = _session.Query<TopicModels>()
-											.OrderBy(x => x.Created)
-											.Skip(offset)
-											.Take(count)
+					var _result = _session.Query<Topic>()
+											.OrderByDescending(x => x.Created)
+											.Skip(0)
+											.Take(10)
 											.ToList();
 
 					return _result;
@@ -40,13 +40,13 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		// GET api/topic/5
-		public TopicModels Get(int id)
+		public Topic Get(int id)
 		{
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
 				using (var _session = _store.OpenSession())
 				{
-					var _result = _session.Load<TopicModels>("TopicModels/" + id);
+					var _result = _session.Load<Topic>("topics/" + id);
 
 					return _result;
 				}
@@ -54,7 +54,7 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		// POST api/topic
-		public int Post(TopicModels newTopic)
+		public int Post(Topic newTopic)
 		{
 			if (CheckModel(newTopic))
 			{
@@ -83,9 +83,19 @@ namespace KnowledgeGraph.Controllers
 		// DELETE api/topic/5
 		public void Delete(int id)
 		{
+			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _result = _session.Load<Topic>("topics/" + id);
+
+					_session.Delete(_result);
+					_session.SaveChanges();
+				}
+			}
 		}
 
-		private bool CheckModel(TopicModels topic)
+		private bool CheckModel(Topic topic)
 		{
 			return !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
 		}

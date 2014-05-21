@@ -1,1 +1,6 @@
-﻿
+﻿html {
+	background-image: url("img/background0.png");
+}
+body {
+	background: none;
+}
