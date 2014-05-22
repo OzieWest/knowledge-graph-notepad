@@ -1,0 +1,43 @@
+﻿<div class="row-fluid">
+	<div style="margin-bottom: 5px;">
+		<a href 
+			style="text-decoration: none;" 
+			ng-show="!isShowHelpLink"
+			ng-click="switchView('createbox')">Start new topic...</a>
+
+		<a href
+			style="text-decoration: none; margin-left: 10px;" 
+			class="text-success" 
+			ng-show="isShowHelpLink"
+			ng-click="goToNewTopic()">Go to new topic</a>
+
+		<a href
+			style="text-decoration: none; margin-left: 10px;" 
+			class="muted" 
+			ng-show="isShowHelpLink"
+			ng-click="switchView('helplink')">No, thanks</a>
+	</div>
+
+	<div ng-show="isShowCreateBox">
+		<div>
+			<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Title" placeholder="Title" />
+		</div>
+
+		<textarea style="width: 100%" rows="7" ng-model="model.Value" placeholder="Type your note here..."></textarea>
+
+		<div class="row-fluid">
+			<div class="span3">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Category" placeholder="Category" />
+			</div>
+			<div class="span8">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.TagSource" placeholder="Tags" />
+			</div>
+			<div class="span1">
+				<button class="btn" 
+					ng-disabled="!model.Title || !model.Value || !model.Category"
+					ng-click="addTopic()">Submit</button>
+			</div>
+		</div>
+		<hr/>
+	</div>
+</div>

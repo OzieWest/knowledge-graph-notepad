@@ -20,6 +20,9 @@
 			else if (method == "delete") {
 				p = $http.delete(path);
 			}
+			else if (method == "put") {
+				p = $http.put(path, data);
+			}
 
 			p.success(function (result) {
 				deferred.resolve(result);
@@ -43,7 +46,10 @@
 			},
 			del: function (id) {
 				return call("delete", "topic/" + id);
-			}
+			},
+			update: function (id, topic) {
+				return call("put", "topic/" + id, topic);
+			},
 		};
 	});
 

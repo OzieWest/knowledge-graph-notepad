@@ -21,9 +21,12 @@
 	</style>
 }
 
-<div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic">
+<div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
 	
-	
+	<new-topic 
+		parent="model"
+		on-add="onAddNewTopic()">
+	</new-topic>
 
 	<div class="well well-small">
 		<div class="mBottom title">
@@ -35,54 +38,76 @@
 		</div>
 
 		<div class="mBottom">
-			<a href="" ng-repeat="tag in model.Tags">{{ tag }}</a>
+			<a href="../tags/{{tag}}" ng-repeat="tag in model.Tags">{{ tag }}</a>
 		</div>
 	</div>
 	
-	<div>
+	<div style="margin-bottom: 10px;">
 		<a ng-click="del()" class="btn btn-danger">Delete</a>
 	</div>
 	
-	<div class="well well-small">
+	<div style="margin-bottom: 10px;">
 		<div class="mBottom title">
-			Parents:
+			Connections
 		</div>
 		
-		<div>
-			<input type="text" ng-model="searchParent" placeholder="search..."/>
-		</div>
-		
-		<ul>
-			<li ng-repeat="link in model.Links">{{ link }}</li>
-		</ul>
+		<table class="table table-bordered table-striped">
+			<tr>
+				<th style="width: 50px;">#</th>
+				<th>Title</th>
+				<th style="width: 100px;">
+					Action
+				</th>
+			</tr>
+			<tr ng-repeat="link in model.Links track by $index ">
+				<td>{{ $index + 1 }}</td>
+				<td>{{ link }}</td>
+				<td>
+					<button class="btn btn-danger">del</button>
+				</td>
+			</tr>
+		</table>
 	</div>
-
 </div>
 
 @section scripts
 {
+	<script src="~/ngApp/app.directives.js"></script>
 	<script>
 		(function(ng, show) {
 			'use strict';
 
 			var id = '@Html.Raw(ViewBag.Id)';
 
-			var app = ng.module('app.page-view-topic', ['app.service']);
+			var app = ng.module('app.page-view-topic', ['app.service', 'app.directive']);
 
 			app.controller('ctrl.page-view-topic', function($scope, repoTopics) {
-				$scope.model = {};
-				$scope.searchParent = '';
+				var that = this;
 
-				repoTopics.getById(id).then(function(result) {
-					$scope.model = result;
-					show.info('Load complete!');
-				});
+				$scope.model = {};
 
 				$scope.del = function() {
-					repoTopics.del($scope.model.Id).then(function () {
+					repoTopics.del($scope.model.Id).then(function() {
 						window.location = "/";
-					});
+					}, that.onError);
 				};
+
+				$scope.onAddNewTopic = function () {
+					$scope.$apply();
+					repoTopics.update(id, $scope.model).then(function() {
+						show.success('Update correct');
+					}, that.onError);
+				};
+
+				that.onError = function (msg) {
+					show.error(msg, 'Error');
+				};
+				
+				// INIT --------------------------------------------------
+				repoTopics.getById(id).then(function (result) {
+					$scope.model = result;
+					show.info('Load complete!');
+				}, that.onError);
 			});
 
 		}(angular, toastr));

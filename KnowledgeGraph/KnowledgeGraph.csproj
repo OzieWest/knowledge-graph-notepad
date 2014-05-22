@@ -206,6 +206,7 @@
     <Content Include="Content\toastr.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="ngApp\app.directives.js" />
     <Content Include="ngApp\app.service.js" />
     <Content Include="Scripts\angular-mocks.js" />
     <Content Include="Scripts\angular-route.min.js" />
@@ -233,6 +234,7 @@
     <Content Include="Scripts\toastr.min.js" />
     <Content Include="Scripts\underscore-min.js" />
     <Content Include="Scripts\underscore.js" />
+    <Content Include="templates\tmpl.directive.new-topic.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

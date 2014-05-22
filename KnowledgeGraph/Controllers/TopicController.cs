@@ -76,8 +76,9 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		// PUT api/topic/5
-		public void Put(int id, [FromBody]string value)
+		public void Put(int id, Topic oldTopic)
 		{
+			var a = 1;
 		}
 
 		// DELETE api/topic/5
