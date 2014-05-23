@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using KnowledgeGraph.Models;
+using Raven.Client;
 using Raven.Client.Document;
 
 namespace KnowledgeGraph.Controllers
@@ -22,7 +23,8 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		// GET api/topic
-		public IEnumerable<Topic> Get()
+		[ActionName("DefaultAction")]
+		public HttpResponseMessage Get()
 		{
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
@@ -34,27 +36,35 @@ namespace KnowledgeGraph.Controllers
 											.Take(10)
 											.ToList();
 
-					return _result;
+					return Request.CreateResponse(HttpStatusCode.OK, _result);
 				}
 			}
 		}
 
 		// GET api/topic/5
-		public Topic Get(int id)
+		[ActionName("DefaultAction")]
+		public HttpResponseMessage Get(int id)
 		{
+			if (id <= 0)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Id should be more than 0");
+
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
 				using (var _session = _store.OpenSession())
 				{
 					var _result = _session.Load<Topic>("topics/" + id);
 
-					return _result;
+					if (_result != null)
+						return Request.CreateResponse(HttpStatusCode.OK, _result);
+
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "This ID doesn't exists.");
 				}
 			}
 		}
 
 		// POST api/topic
-		public int Post(Topic newTopic)
+		[ActionName("DefaultAction")]
+		public HttpResponseMessage Post(Topic newTopic)
 		{
 			if (CheckModel(newTopic))
 			{
@@ -68,37 +78,117 @@ namespace KnowledgeGraph.Controllers
 						_session.Store(newTopic);
 						_session.SaveChanges();
 
-						return newTopic.Id;
+						return Request.CreateResponse(HttpStatusCode.Created, newTopic.Id);
 					}
 				}
 			}
-			return 0;
+			return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Not correct topic structure");
 		}
 
 		// PUT api/topic/5
-		public void Put(int id, Topic oldTopic)
+		[ActionName("DefaultAction")]
+		public HttpResponseMessage Put(int id, Topic oldTopic)
 		{
-			var a = 1;
+			if (id <= 0)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Id should be more than 0");
+
+			if (CheckModel(oldTopic))
+			{
+				using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+				{
+					using (var _session = _store.OpenSession())
+					{
+						var _result = _session.Load<Topic>("topics/" + id);
+
+						_result.Modified = DateTime.UtcNow;
+
+						_result.Title = oldTopic.Title;
+						_result.Value = oldTopic.Value;
+						_result.Category = oldTopic.Category;
+
+						_result.Links = oldTopic.Links;
+						_result.Tags = oldTopic.Tags;
+
+						_session.SaveChanges();
+
+						return Request.CreateResponse(HttpStatusCode.OK);
+					}
+				}
+			}
+			return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Not correct topic structure");
 		}
 
 		// DELETE api/topic/5
-		public void Delete(int id)
+		[ActionName("DefaultAction")]
+		public HttpResponseMessage Delete(int id)
 		{
+			if (id <= 0)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Id should be more than 0");
+
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
 				using (var _session = _store.OpenSession())
 				{
 					var _result = _session.Load<Topic>("topics/" + id);
 
+					if (_result == null)
+						return Request.CreateErrorResponse(HttpStatusCode.NotFound, "This ID doesn't exists.");
+
+					foreach (var _link in _result.Links)
+					{
+						_session.Load<Topic>("topics/" + _link)
+								.IfNotNull(x => x.Links.Remove(id));
+					}
+
 					_session.Delete(_result);
 					_session.SaveChanges();
+
+					return Request.CreateResponse(HttpStatusCode.OK);
+
+				}
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage GetPostsTitles(int id, int[] arrayId)
+		{
+			if (id <= 0)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "ID should be more than 0");
+
+			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _result = new List<TitleResponse>();
+					foreach (var _topicId in arrayId)
+					{
+						var _topic = _session.Load<Topic>("topics/" + _topicId);
+						_result.Add(new TitleResponse { Id = _topic.Id, Title = _topic.Title });
+					}
+
+					return Request.CreateResponse(HttpStatusCode.OK, _result);
 				}
 			}
 		}
 
 		private bool CheckModel(Topic topic)
 		{
-			return !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
+			return topic != null && !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
+		}
+	}
+
+	public class TitleResponse
+	{
+		public int Id;
+		public string Title;
+	}
+
+	public static class Ext
+	{
+		public static void IfNotNull<T>(this T obj, Action<T> action) where T : class
+		{
+			if (obj != null)
+				action(obj);
 		}
 	}
 }

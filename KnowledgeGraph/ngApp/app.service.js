@@ -50,6 +50,9 @@
 			update: function (id, topic) {
 				return call("put", "topic/" + id, topic);
 			},
+			getPostsTitles: function (id, arrayId) {
+				return call("post", "topic/" + id + "/GetPostsTitles", arrayId);
+			},
 		};
 	});
 

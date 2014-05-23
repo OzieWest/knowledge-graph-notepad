@@ -59,9 +59,11 @@
 					Action
 				</th>
 			</tr>
-			<tr ng-repeat="link in model.Links track by $index ">
+			<tr ng-repeat="con in connections track by $index ">
 				<td>{{ $index + 1 }}</td>
-				<td>{{ link }}</td>
+				<td>
+					<a href="viewtopic?id={{ con.Id }}">{{ con.Title }}</a>
+				</td>
 				<td>
 					<button class="btn btn-danger">del</button>
 				</td>
@@ -84,6 +86,7 @@
 			app.controller('ctrl.page-view-topic', function($scope, repoTopics) {
 				var that = this;
 
+				$scope.connections = [];
 				$scope.model = {};
 
 				$scope.del = function() {
@@ -92,22 +95,32 @@
 					}, that.onError);
 				};
 
-				$scope.onAddNewTopic = function () {
-					$scope.$apply();
+				$scope.onAddNewTopic = function() {
 					repoTopics.update(id, $scope.model).then(function() {
 						show.success('Update correct');
 					}, that.onError);
 				};
 
-				that.onError = function (msg) {
-					show.error(msg, 'Error');
+				that.onError = function(msg) {
+					show.error(msg.Message, 'Error');
 				};
-				
+
 				// INIT --------------------------------------------------
-				repoTopics.getById(id).then(function (result) {
+				repoTopics.getById(id).then(function(result) {
 					$scope.model = result;
-					show.info('Load complete!');
+
+					if (!$scope.model.Links) {
+						$scope.model.Links = [];
+					} else {
+						that.loadConnections($scope.model.Links);
+					}
 				}, that.onError);
+
+				that.loadConnections = function (data) {
+					repoTopics.getPostsTitles(id, data).then(function (res) {
+						$scope.connections = ng.copy(res);
+					}, that.onError);
+				};
 			});
 
 		}(angular, toastr));
