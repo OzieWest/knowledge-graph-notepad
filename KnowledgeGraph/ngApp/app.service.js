@@ -53,6 +53,9 @@
 			getPostsTitles: function (id, arrayId) {
 				return call("post", "topic/" + id + "/GetPostsTitles", arrayId);
 			},
+			breakConnections: function (id, conId) {
+				return call("post", "topic/" + id + "/BreakConnections", conId);
+			},
 		};
 	});
 

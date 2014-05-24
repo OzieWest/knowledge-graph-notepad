@@ -12,31 +12,31 @@
 	<link href="~/Content/Site.css" rel="stylesheet" />
 
 	@RenderSection("header", required: false)
+
+	<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+	<script src="~/Scripts/underscore.js"></script>
+	<script src="~/Scripts/toastr.min.js"></script>
+
+	<script src="~/Scripts/angular.min.js"></script>
+	<script src="~/Scripts/angular-sanitize.min.js"></script>
+	<script src="~/ngApp/app.service.js"></script>
 </head>
-	<body>
-		
-		<div class="container">
-		
-			<div id="header">
-				<h3><a href="/">TreePad</a></h3>
-			</div>
+<body>
 
-			<div id="main">
-				@RenderBody()
-			</div>
+	<div class="container">
 
-			<div id="footer"></div>
-
+		<div id="header">
+			<h3><a href="/">TreePad</a></h3>
 		</div>
-		
-		<script src="~/Scripts/jquery-1.8.2.min.js"></script>
-		<script src="~/Scripts/underscore.js"></script>
-		<script src="~/Scripts/toastr.min.js"></script>
 
-		<script src="~/Scripts/angular.min.js"></script>
-		<script src="~/Scripts/angular-sanitize.min.js"></script>
-		<script src="~/ngApp/app.service.js"></script>
+		<div id="main">
+			@RenderBody()
+		</div>
 
-		@RenderSection("scripts", required: false)
-	</body>
+		<div id="footer"></div>
+
+	</div>
+
+	@RenderSection("scripts", required: false)
+</body>
 </html>

@@ -16,7 +16,6 @@
 
 				$scope.newTopicId = 0;
 				$scope.isShowCreateBox = false;
-				$scope.isShowHelpLink = false;
 
 				that.clearTopic = function () {
 					$scope.model = {
@@ -30,17 +29,11 @@
 					};
 				}
 
-				$scope.switchView = function (command) {
-					if (command == 'createbox') {
-						$scope.isShowCreateBox = !$scope.isShowCreateBox;
+				$scope.switchView = function () {
+					$scope.isShowCreateBox = !$scope.isShowCreateBox;
 
-						if (!$scope.model.Category) {
-							$scope.model.Category = $scope.parent.Category;
-						}
-					}
-					else if (command == 'helplink') {
-						$scope.isShowCreateBox = false;
-						$scope.isShowHelpLink = false;
+					if (!$scope.model.Category) {
+						$scope.model.Category = $scope.parent.Category;
 					}
 				};
 
@@ -61,20 +54,16 @@
 
 				$scope.addTopic = function () {
 					if (that.checkModel()) {
-
 						repoTopics.add($scope.model).then(function (res) {
 							$scope.newTopicId = res;
 							
 							that.updateParentLink();
 							that.clearTopic();
-							that.changeView();
+
+							$scope.isShowCreateBox = false;
+							show.success('New topic created!', 'Success');
 						});
 					}
-				};
-
-				that.changeView = function () {
-					$scope.isShowCreateBox = false;
-					$scope.isShowHelpLink = true;
 				};
 
 				that.updateParentLink = function () {

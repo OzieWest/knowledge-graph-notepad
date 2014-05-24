@@ -134,10 +134,13 @@ namespace KnowledgeGraph.Controllers
 					if (_result == null)
 						return Request.CreateErrorResponse(HttpStatusCode.NotFound, "This ID doesn't exists.");
 
-					foreach (var _link in _result.Links)
+					if (_result.Links != null)
 					{
-						_session.Load<Topic>("topics/" + _link)
-								.IfNotNull(x => x.Links.Remove(id));
+						foreach (var _link in _result.Links)
+						{
+							_session.Load<Topic>("topics/" + _link)
+									.IfNotNull(x => x.Links.Remove(id));
+						}
 					}
 
 					_session.Delete(_result);
@@ -167,6 +170,29 @@ namespace KnowledgeGraph.Controllers
 					}
 
 					return Request.CreateResponse(HttpStatusCode.OK, _result);
+				}
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage BreakConnections(int id, int[] conId)
+		{
+			if (id <= 0 || conId[0] <= 0)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "ID and ConID should be more than 0");
+
+			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _firstTopic = _session.Load<Topic>("topics/" + id);
+					_firstTopic.IfNotNull(x => x.Links.Remove(conId[0]));
+
+					var _secondTopic = _session.Load<Topic>("topics/" + conId[0]);
+					_secondTopic.IfNotNull(x => x.Links.Remove(id));
+
+					_session.SaveChanges();
+
+					return Request.CreateResponse(HttpStatusCode.OK, true);
 				}
 			}
 		}

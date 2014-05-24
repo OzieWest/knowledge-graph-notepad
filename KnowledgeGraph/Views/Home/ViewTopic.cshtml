@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "View topic";
+	ViewBag.Title = "View topic";
 }
 
 @section header {
@@ -18,46 +18,50 @@
 			margin-top: 5px;
 			margin-bottom: 14px;
 		}
+
+		.delLink {
+			cursor: pointer;
+			margin-right: 5px;
+			text-decoration: none;
+		}
 	</style>
 }
 
 <div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
-	
-	<new-topic 
+
+	<new-topic
 		parent="model"
 		on-add="onAddNewTopic()">
-	</new-topic>
+		</new-topic>
 
 	<div class="well well-small">
 		<div class="mBottom title">
-			{{ model.Title }}
+			<a ng-click="deleleCurrentPost()" class="delLink" placeholder="Delete post"><i class="icon-trash"></i></a>{{ model.Title }}
 		</div>
 
 		<div style="font-size: 17px;" class="mBottom">
 			{{ model.Value }}
 		</div>
-
+		<hr style="margin-bottom: 5px;" />
 		<div class="mBottom">
-			<a href="../tags/{{tag}}" ng-repeat="tag in model.Tags">{{ tag }}</a>
+			<span class="muted">{{ model.Created | date:'medium' }}  | </span><span class="text-success">{{ model.Category }}</span>
 		</div>
 	</div>
-	
-	<div style="margin-bottom: 10px;">
-		<a ng-click="del()" class="btn btn-danger">Delete</a>
-	</div>
-	
+
 	<div style="margin-bottom: 10px;">
 		<div class="mBottom title">
 			Connections
 		</div>
-		
-		<table class="table table-bordered table-striped">
+
+		<div ng-show="!connections.length">
+			<span class="label label-info">No connections</span>
+		</div>
+
+		<table class="table table-bordered table-striped" ng-show="connections.length">
 			<tr>
 				<th style="width: 50px;">#</th>
 				<th>Title</th>
-				<th style="width: 100px;">
-					Action
-				</th>
+				<th style="width: 50px;"></th>
 			</tr>
 			<tr ng-repeat="con in connections track by $index ">
 				<td>{{ $index + 1 }}</td>
@@ -65,7 +69,9 @@
 					<a href="viewtopic?id={{ con.Id }}">{{ con.Title }}</a>
 				</td>
 				<td>
-					<button class="btn btn-danger">del</button>
+					<button class="btn" placeholder="Delete connections" ng-click="breakConnections(con.Id)">
+						<i class="icon-trash"></i>
+					</button>
 				</td>
 			</tr>
 		</table>
@@ -89,19 +95,36 @@
 				$scope.connections = [];
 				$scope.model = {};
 
-				$scope.del = function() {
+				$scope.deleleCurrentPost = function() {
 					repoTopics.del($scope.model.Id).then(function() {
 						window.location = "/";
 					}, that.onError);
 				};
 
-				$scope.onAddNewTopic = function() {
-					repoTopics.update(id, $scope.model).then(function() {
-						show.success('Update correct');
+				$scope.breakConnections = function(conId) {
+					repoTopics.breakConnections($scope.model.Id, [conId]).then(function (res) {
+						if (res) {
+							var ind = _.map($scope.connections, function (e) { return e.val; }).indexOf(conId);
+							$scope.connections.splice(ind, 1);
+							
+							var links = $scope.model.Links;
+							links.splice(links.indexOf(conId), 1);
+							
+							show.success('Connections broke!', 'Success');
+						}
 					}, that.onError);
 				};
 
-				that.onError = function(msg) {
+				$scope.onAddNewTopic = function() {
+					repoTopics.update(id, $scope.model).then(function() {
+						that.loadConnections($scope.model.Links).then(function() {
+							show.success('Update correct');
+						});
+					}, that.onError);
+				};
+
+				that.onError = function (msg) {
+					console.log('Error', msg);
 					show.error(msg.Message, 'Error');
 				};
 
@@ -116,8 +139,8 @@
 					}
 				}, that.onError);
 
-				that.loadConnections = function (data) {
-					repoTopics.getPostsTitles(id, data).then(function (res) {
+				that.loadConnections = function(data) {
+					repoTopics.getPostsTitles(id, data).then(function(res) {
 						$scope.connections = ng.copy(res);
 					}, that.onError);
 				};
