@@ -10,43 +10,28 @@
 		}
 
 		.full-size {
-			width: 95%;
+			width: 100%;
 		}
 	</style>
 }
 
 <div ng-app="app.page-index" ng-controller="ctrl.page-index">
 
-	<div style="margin-bottom: 10px;">
-		<a ng-click="switchCreateBox()">Start new thread...</a>
-	</div>
-
-	<div ng-show="isShowCreateBox" style="margin-bottom: 10px;">
-		<div>
-			<input type="text" class="full-size" name="name" ng-model="currentTopic.Category" placeholder="Category" />
-		</div>
-		<div>
-			<input type="text" class="full-size" name="name" ng-model="currentTopic.Title" placeholder="Title" />
-		</div>
-		<textarea class="full-size" rows="4" ng-model="currentTopic.Value" placeholder="Type your note here..."></textarea>
-		<div>
-			<input type="text" class="full-size" name="name" ng-model="currentTopic.TagSource" placeholder="Tags" />
-		</div>
-		<div>
-			<button class="btn" ng-click="addTopic()">Submit</button>
-		</div>
-	</div>
+	<new-topic
+		parent="newTopic"
+		translate="Start new topic..."
+		on-add="onAddNewTopic()">
+	</new-topic>
 
 	<div class="well well-small" ng-repeat="topic in topics">
-		<a style="color: green;">{{ topic.Category }}</a>
 		<h4>
-			<a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
+			<a ng-click="delelePost(topic.Id)" class="delLink" placeholder="Delete post"><i class="icon-trash"></i></a><a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
 		</h4>
 
 		<div style="margin-top: 10px; font-size: 17px;">{{ topic.Value }}</div>
 
 		<div style="margin-top: 10px; font-size: 12px;">
-			<a style="color: gray;">{{ topic.Created | date:'medium' }}</a> | <a style="margin-right: 2px;" ng-repeat="tag in topic.Tags"><span>{{ tag }}</span></a>
+			<a style="color: gray;">{{ topic.Created | date:'medium' }}</a> | <a style="color: green;">{{ topic.Category }}</a>
 		</div>
 	</div>
 </div>
@@ -57,52 +42,57 @@
 		'use strict';
 
 		(function(ng, show) {
-			var app = ng.module('app.page-index', ['app.service']);
+			var app = ng.module('app.page-index', ['app.service', 'app.directive']);
 
 			app.controller('ctrl.page-index', function($scope, repoTopics) {
+				var that = this;
+				
 				$scope.topics = [];
-				$scope.currentTopic = clearPost();
-				$scope.isShowCreateBox = false;
+				$scope.newTopic = {};
 
-				function clearPost() {
-					return {
-						Title: '',
-						Value: '',
-						Tags: [],
-						Category: '',
-
-						TagSource: '',
+				that.onError = function (err) {
+					show.error(err.message, 'Error');
+					console.log('Error', err);
+				};
+				
+				that.clearTopic = function() {
+					$scope.newTopic = {
+						id: 0,
+						Links: [],
+						Category: 'Общее',
 					};
-				}
+				};
 
-				repoTopics.getAll().then(function(r) {
-					$scope.topics = ng.copy(r);
-				}, show.error);
-
-				$scope.addTopic = function() {
-
-
-					$scope.currentTopic.Tags = $scope.currentTopic
-						.TagSource
-						.toLowerCase()
-						.split(',');
-
-					repoTopics.add($scope.currentTopic).then(function(res) {
-						repoTopics.getById(res).then(function (newTopic) {
-
-							$scope.topics.splice(0, 0, newTopic);
-
-							$scope.currentTopic = clearPost();
-							show.success('Topic created!', 'Success');
-						});
+				$scope.onAddNewTopic = function() {
+					var newTopicId = $scope.newTopic.Links[0];
+					repoTopics.getById(newTopicId).then(function(res) {
+						$scope.topics.splice(0, 0, res);
+						that.clearTopic();
 					});
 				};
 
-				$scope.switchCreateBox = function() {
-					$scope.isShowCreateBox = !$scope.isShowCreateBox;
+				$scope.delelePost = function(id) {
+					repoTopics.del(id).then(function() {
+
+						var ind = _.map($scope.topics, function(e) {
+							return e.Id;
+						}).indexOf(id);
+
+						$scope.topics.splice(ind, 1);
+
+						show.success('Topic deleted!', 'Success');
+					}, that.onError);
 				};
 
-				show.info('Load complete');
+				// INIT -------------------------------------------
+				(function init () {
+					that.clearTopic();
+
+					repoTopics.getAll().then(function (r) {
+						$scope.topics = ng.copy(r);
+						show.info('Load complete');
+					}, that.onError);
+				}());
 			});
 
 		})(angular, toastr);

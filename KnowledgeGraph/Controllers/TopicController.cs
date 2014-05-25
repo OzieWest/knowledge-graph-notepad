@@ -107,7 +107,6 @@ namespace KnowledgeGraph.Controllers
 						_result.Category = oldTopic.Category;
 
 						_result.Links = oldTopic.Links;
-						_result.Tags = oldTopic.Tags;
 
 						_session.SaveChanges();
 

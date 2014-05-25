@@ -31,8 +31,9 @@
 
 	<new-topic
 		parent="model"
+		translate="Start new subtopic..."
 		on-add="onAddNewTopic()">
-		</new-topic>
+	</new-topic>
 
 	<div class="well well-small">
 		<div class="mBottom title">
@@ -80,7 +81,6 @@
 
 @section scripts
 {
-	<script src="~/ngApp/app.directives.js"></script>
 	<script>
 		(function(ng, show) {
 			'use strict';
@@ -117,9 +117,7 @@
 
 				$scope.onAddNewTopic = function() {
 					repoTopics.update(id, $scope.model).then(function() {
-						that.loadConnections($scope.model.Links).then(function() {
-							show.success('Update correct');
-						});
+						that.loadConnections($scope.model.Links);
 					}, that.onError);
 				};
 
@@ -134,7 +132,8 @@
 
 					if (!$scope.model.Links) {
 						$scope.model.Links = [];
-					} else {
+					}
+					if ($scope.model.Links.length) {
 						that.loadConnections($scope.model.Links);
 					}
 				}, that.onError);

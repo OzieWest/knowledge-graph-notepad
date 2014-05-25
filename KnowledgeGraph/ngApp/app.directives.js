@@ -8,6 +8,7 @@
 			restrict: 'E',
 			scope: {
 				parent: "=",
+				translate: "@",
 				onAdd: "&"
 			},
 			templateUrl: '../templates/tmpl.directive.new-topic.html?1',
@@ -17,17 +18,14 @@
 				$scope.newTopicId = 0;
 				$scope.isShowCreateBox = false;
 
-				that.clearTopic = function () {
+				that.clearTopic = function() {
 					$scope.model = {
 						Title: '',
 						Value: '',
-						Tags: [],
 						Links: [],
 						Category: '',
-
-						TagSource: '',
 					};
-				}
+				};
 
 				$scope.switchView = function () {
 					$scope.isShowCreateBox = !$scope.isShowCreateBox;
@@ -38,10 +36,6 @@
 				};
 
 				that.checkModel = function () {
-					$scope.model.Tags = $scope.model
-										.TagSource
-										.toLowerCase()
-										.split(',');
 					
 					$scope.model.Links.push($scope.parent.Id);
 
