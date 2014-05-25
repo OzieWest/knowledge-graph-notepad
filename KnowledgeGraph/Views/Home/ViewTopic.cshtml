@@ -41,14 +41,14 @@
 		</div>
 
 		<div style="font-size: 17px;" class="mBottom">
-			{{ model.Value }}
+			<div ng-bind-html="model.Value"></div>
 		</div>
 		<hr style="margin-bottom: 5px;" />
 		<div class="mBottom">
 			<span class="muted">{{ model.Created | date:'medium' }}  | </span><span class="text-success">{{ model.Category }}</span>
 		</div>
 	</div>
-
+	
 	<div style="margin-bottom: 10px;">
 		<div class="mBottom title">
 			Connections
@@ -80,43 +80,45 @@
 </div>
 
 @section scripts
-{
+{	
 	<script>
-		(function(ng, show) {
+		(function (ng, show) {
 			'use strict';
 
 			var id = '@Html.Raw(ViewBag.Id)';
 
-			var app = ng.module('app.page-view-topic', ['app.service', 'app.directive']);
+			var app = ng.module('app.page-view-topic', ['app.service', 'app.directive', 'ngSanitize']);
 
-			app.controller('ctrl.page-view-topic', function($scope, repoTopics) {
+			app.controller('ctrl.page-view-topic', function ($scope, repoTopics) {
 				var that = this;
 
 				$scope.connections = [];
 				$scope.model = {};
 
-				$scope.deleleCurrentPost = function() {
-					repoTopics.del($scope.model.Id).then(function() {
+				$scope.htmlVariable = '';
+
+				$scope.deleleCurrentPost = function () {
+					repoTopics.del($scope.model.Id).then(function () {
 						window.location = "/";
 					}, that.onError);
 				};
 
-				$scope.breakConnections = function(conId) {
+				$scope.breakConnections = function (conId) {
 					repoTopics.breakConnections($scope.model.Id, [conId]).then(function (res) {
 						if (res) {
 							var ind = _.map($scope.connections, function (e) { return e.val; }).indexOf(conId);
 							$scope.connections.splice(ind, 1);
-							
+
 							var links = $scope.model.Links;
 							links.splice(links.indexOf(conId), 1);
-							
+
 							show.success('Connections broke!', 'Success');
 						}
 					}, that.onError);
 				};
 
-				$scope.onAddNewTopic = function() {
-					repoTopics.update(id, $scope.model).then(function() {
+				$scope.onAddNewTopic = function () {
+					repoTopics.update(id, $scope.model).then(function () {
 						that.loadConnections($scope.model.Links);
 					}, that.onError);
 				};
@@ -127,7 +129,7 @@
 				};
 
 				// INIT --------------------------------------------------
-				repoTopics.getById(id).then(function(result) {
+				repoTopics.getById(id).then(function (result) {
 					$scope.model = result;
 
 					if (!$scope.model.Links) {
@@ -138,8 +140,8 @@
 					}
 				}, that.onError);
 
-				that.loadConnections = function(data) {
-					repoTopics.getPostsTitles(id, data).then(function(res) {
+				that.loadConnections = function (data) {
+					repoTopics.getPostsTitles(id, data).then(function (res) {
 						$scope.connections = ng.copy(res);
 					}, that.onError);
 				};

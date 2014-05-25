@@ -10,7 +10,20 @@
 	<link href="~/Content/bootstrap-responsive.min.css" rel="stylesheet" />
 	<link href="~/Content/toastr.min.css" rel="stylesheet" />
 	<link href="~/Content/Site.css" rel="stylesheet" />
-
+	
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<style>
+		.ta-editor {
+			min-height: 200px;
+			height: auto;
+			overflow: auto;
+			font-family: inherit;
+			font-size: 100%;
+			margin: 20px 0;
+			background: rgb(247, 247, 247);
+			border: 1px dotted rgb(192, 188, 188);
+		}
+	</style>
 	@RenderSection("header", required: false)
 
 	<script src="~/Scripts/jquery-1.8.2.min.js"></script>
@@ -19,6 +32,7 @@
 
 	<script src="~/Scripts/angular.min.js"></script>
 	<script src="~/Scripts/angular-sanitize.min.js"></script>
+	<script src="~/Scripts/textAngular.min.js"></script>
 	<script src="~/ngApp/app.service.js"></script>
 	<script src="~/ngApp/app.directives.js"></script>
 </head>

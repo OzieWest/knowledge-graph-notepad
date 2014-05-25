@@ -22,18 +22,34 @@
 		translate="Start new topic..."
 		on-add="onAddNewTopic()">
 	</new-topic>
-
-	<div class="well well-small" ng-repeat="topic in topics">
-		<h4>
-			<a ng-click="delelePost(topic.Id)" class="delLink" placeholder="Delete post"><i class="icon-trash"></i></a><a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
-		</h4>
-
-		<div style="margin-top: 10px; font-size: 17px;">{{ topic.Value }}</div>
-
-		<div style="margin-top: 10px; font-size: 12px;">
-			<a style="color: gray;">{{ topic.Created | date:'medium' }}</a> | <a style="color: green;">{{ topic.Category }}</a>
-		</div>
-	</div>
+	
+	<table class="table table-bordered table-striped">
+		<tr style="font-weight: bold;">
+			<td>#</td>
+			<td>
+				Category
+			</td>
+			<td>
+				Title
+			</td>
+			<td style="width: 170px;">Created</td>
+			<td>#</td>
+			<td>#</td>
+		</tr>
+		<tr ng-repeat="topic in topics track by $index">
+			<td>{{ $index + 1 }}</td>
+			<td>
+				<a href class="text-success">{{ topic.Category }}</a>
+			</td>
+			<td>
+				<a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
+			</td>
+			<td style="width: 170px;">{{ topic.Created | date:'medium' }}</td>
+			<td>{{ topic.Links.length }}</td>
+			<td><a ng-click="delelePost(topic.Id)" class="delLink" title="Delete post"><i class="icon-trash"></i></a></td>
+		</tr>
+	</table>
+	
 </div>
 
 @section scripts
@@ -42,7 +58,7 @@
 		'use strict';
 
 		(function(ng, show) {
-			var app = ng.module('app.page-index', ['app.service', 'app.directive']);
+			var app = ng.module('app.page-index', ['app.service', 'app.directive', 'ngSanitize']);
 
 			app.controller('ctrl.page-index', function($scope, repoTopics) {
 				var that = this;

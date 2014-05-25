@@ -1,6 +1,6 @@
 ﻿(function (ng, show) {
 
-	var app = ng.module('app.directive', ['app.service']);
+	var app = ng.module('app.directive', ['app.service', 'textAngular']);
 
 	app.directive('newTopic', function () {
 		return {
