@@ -111,7 +111,7 @@ namespace KnowledgeGraph.Controllers
 
 						_session.SaveChanges();
 
-						return Request.CreateResponse(HttpStatusCode.OK);
+						return Request.CreateResponse(HttpStatusCode.OK, true);
 					}
 				}
 			}

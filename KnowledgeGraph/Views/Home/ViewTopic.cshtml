@@ -11,7 +11,7 @@
 			margin-bottom: 14px;
 		}
 
-		.delLink {
+		.postLink {
 			cursor: pointer;
 			margin-right: 5px;
 			text-decoration: none;
@@ -20,18 +20,20 @@
 }
 
 <div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
-
+	
 	<new-topic
+		ng-show="!isShowCreateBox"
 		parent="model"
 		translate="Start new subtopic..."
 		on-add="onAddNewTopic()">
 	</new-topic>
-	
-	<div class="well well-small" style="margin-bottom: 30px;">
-		<div class="mBottom title">
-			<a ng-click="deleleCurrentPost()" class="delLink" title="Delete post"><i class="icon-trash"></i></a>{{ model.Title }}
-		</div>
 
+	<div ng-show="!isShowCreateBox" class="well well-small" style="margin-bottom: 30px;">
+		<div class="mBottom title">
+			<a ng-click="deleleCurrentPost()" class="postLink" title="Delete post"><i style="margin-top: 5px;" class="icon-trash"></i></a>
+			<a ng-click="switchView()" class="postLink" title="Edit post"><i style="margin-top: 5px;" class="icon-edit"></i></a>
+			{{ model.Title }}
+		</div>
 		<div style="font-size: 17px;" class="mBottom">
 			<div ng-bind-html="model.Value"></div>
 		</div>
@@ -40,20 +42,49 @@
 			<span class="muted">{{ model.Created | date:'medium' }}  | </span><span class="text-success">{{ model.Category }}</span>
 		</div>
 	</div>
+	
+	<div ng-show="isShowCreateBox" style="margin-bottom: 15px;">
+		<span class="label label-important">Edit mode on:</span>
+	</div>
+
+	<div ng-show="isShowCreateBox">
+		<div class="row-fluid">
+			<div class="span3">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="newModel.Category" placeholder="Category" />
+			</div>
+			<div class="span9">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="newModel.Title" placeholder="Title" />
+			</div>
+		</div>
+
+		<text-angular ng-model="newModel.Value"></text-angular>
+
+		<div class="row-fluid mBottom">
+			<div class="span2 offset10">
+				<button class="btn"
+					ng-disabled="!newModel.Title || !newModel.Value || !newModel.Category"
+					ng-click="switchView()">
+					Cancel</button>
+
+				<button class="btn"
+					ng-disabled="!newModel.Title || !newModel.Value || !newModel.Category"
+					ng-click="saveTopic()">
+					Save</button>
+			</div>
+		</div>
+		<hr />
+	</div>
 
 	<div style="margin-bottom: 30px;">
 		<div class="mBottom title">
 			Links 
 		</div>
-
 		<div style="margin-bottom: 5px;">
 			<a style="text-decoration: none; cursor: pointer;" class="text-success" ng-click="switchLinkView()">Add new link...</a>
 		</div>
-
 		<div ng-show="!model.Links.length" class="mBottom">
 			<span class="label label-info">No links</span>
 		</div>
-
 		<div class="row-fluid mBottom" ng-show="isAddNewLink">
 			<div class="span7">
 				<input type="text" style="width: 100%;" placeholder="Title" ng-model="newLink.Title" />
@@ -65,7 +96,6 @@
 				<a class="btn" ng-click="addNewLink()"><i class="icon-plus-sign"></i></a>
 			</div>
 		</div>
-
 		<table class="table table-bordered table-striped" ng-show="model.Links.length">
 			<tr>
 				<th style="width: 50px;">#</th>
@@ -90,11 +120,9 @@
 		<div class="mBottom title">
 			Connections
 		</div>
-
 		<div ng-show="!connections.length">
 			<span class="label label-info">No connections</span>
 		</div>
-
 		<table class="table table-bordered table-striped" ng-show="connections.length">
 			<tr>
 				<th style="width: 50px;">#</th>
@@ -131,7 +159,8 @@
 
 				// Topics ====================================================
 				$scope.model = {};
-				$scope.htmlVariable = '';
+				$scope.newModel = {};
+				$scope.isShowCreateBox = false;
 
 				$scope.deleleCurrentPost = function() {
 					repoTopics.del($scope.model.Id).then(function() {
@@ -139,10 +168,44 @@
 					}, that.onError);
 				};
 
+				$scope.switchView = function() {
+					$scope.isShowCreateBox = !$scope.isShowCreateBox;
+
+					if ($scope.isShowCreateBox) {
+						$scope.newModel.Category = $scope.model.Category;
+						$scope.newModel.Value = $scope.model.Value;
+						$scope.newModel.Title = $scope.model.Title;
+					}
+				};
+
 				$scope.onAddNewTopic = function() {
 					repoTopics.update(id, $scope.model).then(function() {
 						that.loadConnections($scope.model.Connections);
 					}, that.onError);
+				};
+
+				$scope.saveTopic = function () {
+					$scope.newModel.Links = $scope.model.Links;
+					$scope.newModel.Connections = $scope.model.Connections;
+
+					repoTopics.update($scope.model.Id, $scope.newModel).then(function (status) {
+						if (status) {
+						
+							$scope.model.Category = $scope.newModel.Category;
+							$scope.model.Value = $scope.newModel.Value;
+							$scope.model.Title = $scope.newModel.Title;
+							$scope.model.Links = $scope.newModel.Links;
+							$scope.model.Connections = $scope.newModel.Connections;
+
+							$scope.isShowCreateBox = false;
+							
+							show.success('Topic updated!', 'Success');
+						} else {
+							that.onError();
+						}
+					}, that.onError);
+					
+
 				};
 
 
@@ -190,7 +253,7 @@
 							if (!$scope.model.Links) {
 								$scope.model.Links = [];
 							}
-							
+
 							$scope.model.Links.push($scope.newLink);
 
 							$scope.switchLinkView();
