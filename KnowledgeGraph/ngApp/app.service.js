@@ -56,6 +56,12 @@
 			breakConnections: function (id, conId) {
 				return call("post", "topic/" + id + "/BreakConnections", conId);
 			},
+			deleteLink: function (id, link) {
+				return call("post", "topic/" + id + "/DeleteLink", link);
+			},
+			addLink: function (id, link) {
+				return call("post", "topic/" + id + "/AddLink", link);
+			},
 		};
 	});
 

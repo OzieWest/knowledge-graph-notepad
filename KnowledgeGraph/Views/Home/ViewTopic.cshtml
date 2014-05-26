@@ -4,14 +4,6 @@
 
 @section header {
 	<style>
-		.mBottom {
-			margin-bottom: 5px;
-		}
-
-		.mLeft10 {
-			margin-left: 10px;
-		}
-
 		.title {
 			font-size: 24px;
 			color: rgb(97, 97, 97);
@@ -34,10 +26,10 @@
 		translate="Start new subtopic..."
 		on-add="onAddNewTopic()">
 	</new-topic>
-
-	<div class="well well-small">
+	
+	<div class="well well-small" style="margin-bottom: 30px;">
 		<div class="mBottom title">
-			<a ng-click="deleleCurrentPost()" class="delLink" placeholder="Delete post"><i class="icon-trash"></i></a>{{ model.Title }}
+			<a ng-click="deleleCurrentPost()" class="delLink" title="Delete post"><i class="icon-trash"></i></a>{{ model.Title }}
 		</div>
 
 		<div style="font-size: 17px;" class="mBottom">
@@ -48,7 +40,52 @@
 			<span class="muted">{{ model.Created | date:'medium' }}  | </span><span class="text-success">{{ model.Category }}</span>
 		</div>
 	</div>
-	
+
+	<div style="margin-bottom: 30px;">
+		<div class="mBottom title">
+			Links 
+		</div>
+
+		<div style="margin-bottom: 5px;">
+			<a style="text-decoration: none; cursor: pointer;" class="text-success" ng-click="switchLinkView()">Add new link...</a>
+		</div>
+
+		<div ng-show="!model.Links.length" class="mBottom">
+			<span class="label label-info">No links</span>
+		</div>
+
+		<div class="row-fluid mBottom" ng-show="isAddNewLink">
+			<div class="span7">
+				<input type="text" style="width: 100%;" placeholder="Title" ng-model="newLink.Title" />
+			</div>
+			<div class="span4">
+				<input type="text" style="width: 100%;" placeholder="Url" ng-model="newLink.Url" />
+			</div>
+			<div class="span1">
+				<a class="btn" ng-click="addNewLink()"><i class="icon-plus-sign"></i></a>
+			</div>
+		</div>
+
+		<table class="table table-bordered table-striped" ng-show="model.Links.length">
+			<tr>
+				<th style="width: 50px;">#</th>
+				<th>Title</th>
+				<th style="width: 50px;"></th>
+			</tr>
+			<tr ng-repeat="link in model.Links track by $index">
+				<td>{{ $index + 1 }}</td>
+				<td>
+					<a href="{{ link.Url }}" target="_blank">{{ link.Title }}</a>
+				</td>
+				<td>
+					<button class="btn" title="Delete link" ng-click="deleteLink(link)">
+						<i class="icon-trash"></i>
+					</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+
 	<div style="margin-bottom: 10px;">
 		<div class="mBottom title">
 			Connections
@@ -70,7 +107,7 @@
 					<a href="viewtopic?id={{ con.Id }}">{{ con.Title }}</a>
 				</td>
 				<td>
-					<button class="btn" placeholder="Delete connections" ng-click="breakConnections(con.Id)">
+					<button class="btn" title="Delete connections" ng-click="breakConnections(con.Id)">
 						<i class="icon-trash"></i>
 					</button>
 				</td>
@@ -80,71 +117,123 @@
 </div>
 
 @section scripts
-{	
+{
 	<script>
-		(function (ng, show) {
+		(function(ng, show) {
 			'use strict';
 
 			var id = '@Html.Raw(ViewBag.Id)';
 
 			var app = ng.module('app.page-view-topic', ['app.service', 'app.directive', 'ngSanitize']);
 
-			app.controller('ctrl.page-view-topic', function ($scope, repoTopics) {
+			app.controller('ctrl.page-view-topic', function($scope, repoTopics) {
 				var that = this;
 
-				$scope.connections = [];
+				// Topics ====================================================
 				$scope.model = {};
-
 				$scope.htmlVariable = '';
 
-				$scope.deleleCurrentPost = function () {
-					repoTopics.del($scope.model.Id).then(function () {
+				$scope.deleleCurrentPost = function() {
+					repoTopics.del($scope.model.Id).then(function() {
 						window.location = "/";
 					}, that.onError);
 				};
 
-				$scope.breakConnections = function (conId) {
-					repoTopics.breakConnections($scope.model.Id, [conId]).then(function (res) {
+				$scope.onAddNewTopic = function() {
+					repoTopics.update(id, $scope.model).then(function() {
+						that.loadConnections($scope.model.Connections);
+					}, that.onError);
+				};
+
+
+				// Connections ====================================================
+				$scope.connections = [];
+
+				$scope.breakConnections = function(conId) {
+					repoTopics.breakConnections($scope.model.Id, [conId]).then(function(res) {
 						if (res) {
-							var ind = _.map($scope.connections, function (e) { return e.val; }).indexOf(conId);
+							var ind = _.map($scope.connections, function(e) { return e.val; }).indexOf(conId);
 							$scope.connections.splice(ind, 1);
 
-							var links = $scope.model.Links;
-							links.splice(links.indexOf(conId), 1);
+							var conIDs = $scope.model.Connections;
+							conIDs.splice(conIDs.indexOf(conId), 1);
 
-							show.success('Connections broke!', 'Success');
+							show.success('Connection broke!', 'Success');
 						}
 					}, that.onError);
 				};
 
-				$scope.onAddNewTopic = function () {
-					repoTopics.update(id, $scope.model).then(function () {
-						that.loadConnections($scope.model.Links);
+
+				// Links ====================================================
+				$scope.newLink = {};
+				$scope.isAddNewLink = false;
+
+				$scope.deleteLink = function(link) {
+					repoTopics.deleteLink($scope.model.Id, link).then(function(res) {
+						if (res) {
+							var ind = _.map($scope.model.Links, function(e) { return e.Url; }).indexOf(link.Url);
+							$scope.model.Links.splice(ind, 1);
+
+							show.success('Link deleted!', 'Success');
+						}
 					}, that.onError);
 				};
 
-				that.onError = function (msg) {
+				$scope.switchLinkView = function() {
+					$scope.isAddNewLink = !$scope.isAddNewLink;
+				};
+
+				$scope.addNewLink = function() {
+					repoTopics.addLink($scope.model.Id, $scope.newLink).then(function(res) {
+						if (res) {
+
+							if (!$scope.model.Links) {
+								$scope.model.Links = [];
+							}
+							
+							$scope.model.Links.push($scope.newLink);
+
+							$scope.switchLinkView();
+							that.clearLink();
+							show.success('Link added!', 'Success');
+						}
+					}, that.onError);
+				};
+
+				that.clearLink = function() {
+					$scope.newLink = {
+						Title: '',
+						Url: ''
+					};
+				};
+
+				// Support ====================================================
+				that.onError = function(msg) {
 					console.log('Error', msg);
 					show.error(msg.Message, 'Error');
 				};
 
-				// INIT --------------------------------------------------
-				repoTopics.getById(id).then(function (result) {
-					$scope.model = result;
+				// INIT ====================================================
+				(function init() {
+					that.clearLink();
 
-					if (!$scope.model.Links) {
-						$scope.model.Links = [];
-					}
-					if ($scope.model.Links.length) {
-						that.loadConnections($scope.model.Links);
-					}
-				}, that.onError);
+					repoTopics.getById(id).then(function(result) {
+						$scope.model = result;
 
-				that.loadConnections = function (data) {
-					repoTopics.getPostsTitles(id, data).then(function (res) {
-						$scope.connections = ng.copy(res);
+						if (!$scope.model.Connections) {
+							$scope.model.Connections = [];
+						}
+						if ($scope.model.Connections.length) {
+							that.loadConnections($scope.model.Connections);
+						}
 					}, that.onError);
-				};
+
+					that.loadConnections = function(data) {
+						repoTopics.getPostsTitles(id, data).then(function(res) {
+							$scope.connections = ng.copy(res);
+						}, that.onError);
+					};
+				})();
 			});
 
 		}(angular, toastr));

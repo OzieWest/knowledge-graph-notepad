@@ -17,11 +17,19 @@
 
 				$scope.newTopicId = 0;
 				$scope.isShowCreateBox = false;
+				
+				that.clearLink = function () {
+					$scope.newLink = {
+						Title: '',
+						Url: '',
+					};
+				};
 
 				that.clearTopic = function() {
 					$scope.model = {
 						Title: '',
 						Value: '',
+						Connections: [],
 						Links: [],
 						Category: '',
 					};
@@ -37,7 +45,7 @@
 
 				that.checkModel = function () {
 					
-					$scope.model.Links.push($scope.parent.Id);
+					$scope.model.Connections.push($scope.parent.Id);
 
 					if ($scope.model.Title && $scope.model.Category && $scope.model.Value) {
 						return true;
@@ -60,8 +68,17 @@
 					}
 				};
 
+				$scope.addLink = function () {
+					if ($scope.newLink.Title && $scope.newLink.Url) {
+						$scope.model.Links.push($scope.newLink);
+						that.clearLink();
+					} else {
+						show.error('Incorrect link!','Error');
+					}
+				};
+
 				that.updateParentLink = function () {
-					$scope.parent.Links.push($scope.newTopicId);
+					$scope.parent.Connections.push($scope.newTopicId);
 					$scope.onAdd();
 				};
 
@@ -69,9 +86,10 @@
 					window.location = "../home/viewtopic?id=" + $scope.newTopicId;
 				};
 
-				// INIT ------------------------------------------------
 
+				// INIT -----------------------------------------------
 				that.clearTopic();
+				that.clearLink();
 			}
 		};
 	});

@@ -24,7 +24,7 @@ namespace KnowledgeGraph.Controllers
 
 		// GET api/topic
 		[ActionName("DefaultAction")]
-		public HttpResponseMessage Get()
+		public HttpResponseMessage Get(int count = 25, int offset = 0)
 		{
 			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
 			{
@@ -32,8 +32,8 @@ namespace KnowledgeGraph.Controllers
 				{
 					var _result = _session.Query<Topic>()
 											.OrderByDescending(x => x.Created)
-											.Skip(0)
-											.Take(10)
+											.Skip(offset)
+											.Take(count)
 											.ToList();
 
 					return Request.CreateResponse(HttpStatusCode.OK, _result);
@@ -106,6 +106,7 @@ namespace KnowledgeGraph.Controllers
 						_result.Value = oldTopic.Value;
 						_result.Category = oldTopic.Category;
 
+						_result.Connections = oldTopic.Connections;
 						_result.Links = oldTopic.Links;
 
 						_session.SaveChanges();
@@ -133,12 +134,12 @@ namespace KnowledgeGraph.Controllers
 					if (_result == null)
 						return Request.CreateErrorResponse(HttpStatusCode.NotFound, "This ID doesn't exists.");
 
-					if (_result.Links != null)
+					if (_result.Connections != null)
 					{
-						foreach (var _link in _result.Links)
+						foreach (var _link in _result.Connections)
 						{
 							_session.Load<Topic>("topics/" + _link)
-									.IfNotNull(x => x.Links.Remove(id));
+									.IfNotNull(x => x.Connections.Remove(id));
 						}
 					}
 
@@ -184,10 +185,60 @@ namespace KnowledgeGraph.Controllers
 				using (var _session = _store.OpenSession())
 				{
 					var _firstTopic = _session.Load<Topic>("topics/" + id);
-					_firstTopic.IfNotNull(x => x.Links.Remove(conId[0]));
+					_firstTopic.IfNotNull(x => x.Connections.Remove(conId[0]));
 
 					var _secondTopic = _session.Load<Topic>("topics/" + conId[0]);
-					_secondTopic.IfNotNull(x => x.Links.Remove(id));
+					_secondTopic.IfNotNull(x => x.Connections.Remove(id));
+
+					_session.SaveChanges();
+
+					return Request.CreateResponse(HttpStatusCode.OK, true);
+				}
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage DeleteLink(int id, Link link)
+		{
+			if (id <= 0 || link == null)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "ID and Links should be more than 0");
+
+			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _firstTopic = _session.Load<Topic>("topics/" + id);
+					_firstTopic.IfNotNull(x =>
+					{
+						var _fLink = x.Links.First(l => l.Url == link.Url && l.Title == link.Title);
+						x.Links.Remove(_fLink);
+					});
+					
+					_session.SaveChanges();
+
+					return Request.CreateResponse(HttpStatusCode.OK, true);
+				}
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage AddLink(int id, Link link)
+		{
+			if (id <= 0 || link == null)
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "ID and Links should be more than 0");
+
+			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _firstTopic = _session.Load<Topic>("topics/" + id);
+					_firstTopic.IfNotNull(x =>
+					{
+						if(x.Links == null)
+							x.Links = new List<Link>();
+
+						x.Links.Add(link);
+					});
 
 					_session.SaveChanges();
 

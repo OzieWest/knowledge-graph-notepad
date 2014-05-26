@@ -6,6 +6,12 @@ using System.Web.UI.WebControls;
 
 namespace KnowledgeGraph.Models
 {
+	public class Link
+	{
+		public String Title { get; set; }
+		public String Url { get; set; }
+	}
+
 	public class Topic
 	{
 		public int Id { get; set; }
@@ -16,7 +22,8 @@ namespace KnowledgeGraph.Models
 		public string Title { get; set; }
 		public string Value { get; set; }
 		public string Category { get; set; }
-		
-		public List<int> Links { get; set; }
+
+		public List<int> Connections { get; set; }
+		public List<Link> Links { get; set; }
 	}
 }

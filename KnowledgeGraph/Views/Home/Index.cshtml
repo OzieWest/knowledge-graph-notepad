@@ -33,7 +33,7 @@
 				Title
 			</td>
 			<td style="width: 170px;">Created</td>
-			<td>#</td>
+			<td>Con</td>
 			<td>#</td>
 		</tr>
 		<tr ng-repeat="topic in topics track by $index">
@@ -45,8 +45,10 @@
 				<a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
 			</td>
 			<td style="width: 170px;">{{ topic.Created | date:'medium' }}</td>
-			<td>{{ topic.Links.length }}</td>
-			<td><a ng-click="delelePost(topic.Id)" class="delLink" title="Delete post"><i class="icon-trash"></i></a></td>
+			<td>{{ topic.Connections.length }}</td>
+			<td>
+				<a ng-click="delelePost(topic.Id)" title="Delete post"><i class="icon-trash"></i></a>
+			</td>
 		</tr>
 	</table>
 	
@@ -55,9 +57,9 @@
 @section scripts
 {
 	<script>
-		'use strict';
-
-		(function(ng, show) {
+		(function (ng, show) {
+			'use strict';
+			
 			var app = ng.module('app.page-index', ['app.service', 'app.directive', 'ngSanitize']);
 
 			app.controller('ctrl.page-index', function($scope, repoTopics) {
@@ -74,13 +76,13 @@
 				that.clearTopic = function() {
 					$scope.newTopic = {
 						id: 0,
-						Links: [],
+						Connections: [],
 						Category: 'Общее',
 					};
 				};
 
 				$scope.onAddNewTopic = function() {
-					var newTopicId = $scope.newTopic.Links[0];
+					var newTopicId = $scope.newTopic.Connections[0];
 					repoTopics.getById(newTopicId).then(function(res) {
 						$scope.topics.splice(0, 0, res);
 						that.clearTopic();

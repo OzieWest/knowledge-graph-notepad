@@ -1,7 +1,7 @@
 ﻿<div class="row-fluid">
 	<div style="margin-bottom: 5px;">
-		<a href 
-			style="text-decoration: none;" 
+		<a href
+			style="text-decoration: none;"
 			ng-click="switchView()">{{ translate }}</a>
 	</div>
 
@@ -17,13 +17,38 @@
 
 		<text-angular ng-model="model.Value"></text-angular>
 
-		<div class="row-fluid">
-			<div class="span1 offset11">
-				<button class="btn" 
-					ng-disabled="!model.Title || !model.Value || !model.Category"
-					ng-click="addTopic()">Submit</button>
+		<div ng-show="model.Links.length" class="mBottom">
+			Links
+			<div ng-show="!model.Links.length">
+				<span class="label label-info">No links</span>
+			</div>
+			<ul>
+				<li ng-repeat="link in model.Links track by $index">
+					<a href="{{ link.Url }}">{{ link.Title }}</a>
+				</li>
+			</ul>
+		</div>
+		
+		<div class="row-fluid mBottom">
+			<div class="span7">
+				<input type="text" style="width: 100%;" placeholder="Title" ng-model="newLink.Title" />
+			</div>
+			<div class="span4">
+				<input type="text" style="width: 100%;" placeholder="Url" ng-model="newLink.Url" />
+			</div>
+			<div class="span1">
+				<a class="btn" ng-click="addLink()"><i class="icon-plus-sign"></i></a>
 			</div>
 		</div>
-		<hr/>
+
+		<div class="row-fluid mBottom">
+			<div class="span1 offset11">
+				<button class="btn"
+					ng-disabled="!model.Title || !model.Value || !model.Category"
+					ng-click="addTopic()">
+					Submit</button>
+			</div>
+		</div>
+		<hr />
 	</div>
 </div>
