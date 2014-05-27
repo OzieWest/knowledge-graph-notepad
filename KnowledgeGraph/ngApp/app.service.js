@@ -2,7 +2,7 @@
 	'use strict';
 	var app = ng.module('app.service', []);
 
-	app.factory('repoTopics', function ($q, $http, $log) {
+	app.factory('topicRepository', function ($q, $http, $log) {
 		var ROOT = "http://localhost:55528/api/";
 		
 		var call = function (method, params, data) {

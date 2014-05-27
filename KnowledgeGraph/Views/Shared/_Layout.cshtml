@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>@ViewBag.Title - TreePad</title>
+	<title>@ViewBag.Title - GraphPad</title>
 	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 	<meta name="viewport" content="width=device-width" />
 
@@ -10,7 +10,7 @@
 	<link href="~/Content/bootstrap-responsive.min.css" rel="stylesheet" />
 	<link href="~/Content/toastr.min.css" rel="stylesheet" />
 	<link href="~/Content/Site.css" rel="stylesheet" />
-	
+
 	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 	<style>
 		.ta-editor {
@@ -23,12 +23,14 @@
 			background: rgb(247, 247, 247);
 			border: 1px dotted rgb(192, 188, 188);
 		}
+
 		.mBottom {
 			margin-bottom: 10px;
 		}
-		 .mLeft10 {
-			 margin-left: 10px;
-		 }
+
+		.mLeft10 {
+			margin-left: 10px;
+		}
 	</style>
 	@RenderSection("header", required: false)
 
@@ -41,13 +43,21 @@
 	<script src="~/Scripts/textAngular.min.js"></script>
 	<script src="~/ngApp/app.service.js"></script>
 	<script src="~/ngApp/app.directives.js"></script>
+
+	<script>
+		angular.module('package.main', [
+			'app.service',
+			'app.directive',
+			'ngSanitize'
+		]);
+	</script>
 </head>
 <body>
 
 	<div class="container">
 
 		<div id="header">
-			<h3><a href="/">TreePad</a></h3>
+			<h3><a href="/">GraphPad</a></h3>
 		</div>
 
 		<div id="main">

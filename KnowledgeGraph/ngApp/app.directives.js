@@ -8,16 +8,18 @@
 			restrict: 'E',
 			scope: {
 				parent: "=",
-				translate: "@",
 				onAdd: "&"
 			},
 			templateUrl: '../templates/tmpl.directive.new-topic.html?1',
-			controller: function ($scope, repoTopics) {
+			controller: function ($scope, topicRepository) {
 				var that = this;
 
 				$scope.newTopicId = 0;
-				$scope.isShowCreateBox = false;
-				
+				$scope.isView = {
+					NewTopic: false,
+					NewLinks: false,
+				};
+
 				that.clearLink = function () {
 					$scope.newLink = {
 						Title: '',
@@ -35,11 +37,16 @@
 					};
 				};
 
-				$scope.switchView = function () {
-					$scope.isShowCreateBox = !$scope.isShowCreateBox;
+				$scope.switchView = {
+					Topic: function () {
+						$scope.isView.NewTopic = !$scope.isView.NewTopic;
 
-					if (!$scope.model.Category) {
-						$scope.model.Category = $scope.parent.Category;
+						if (!$scope.model.Category) {
+							$scope.model.Category = $scope.parent.Category;
+						}
+					},
+					Links: function () {
+						$scope.isView.NewLinks = !$scope.isView.NewLinks;
 					}
 				};
 
@@ -56,13 +63,13 @@
 
 				$scope.addTopic = function () {
 					if (that.checkModel()) {
-						repoTopics.add($scope.model).then(function (res) {
+						topicRepository.add($scope.model).then(function (res) {
 							$scope.newTopicId = res;
 							
 							that.updateParentLink();
 							that.clearTopic();
 
-							$scope.isShowCreateBox = false;
+							$scope.isView.NewTopic = false;
 							show.success('New topic created!', 'Success');
 						});
 					}
@@ -83,9 +90,8 @@
 				};
 
 				$scope.goToNewTopic = function () {
-					window.location = "../home/viewtopic?id=" + $scope.newTopicId;
+					window.location = "../home/topic?id=" + $scope.newTopicId;
 				};
-
 
 				// INIT -----------------------------------------------
 				that.clearTopic();

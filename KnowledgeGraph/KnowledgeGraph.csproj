@@ -266,7 +266,7 @@
     <Content Include="Scripts\underscore-min.map" />
     <Content Include="Scripts\version.json" />
     <Content Include="Scripts\toastr.min.js.map" />
-    <Content Include="Views\Home\ViewTopic.cshtml" />
+    <Content Include="Views\Home\Topic.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

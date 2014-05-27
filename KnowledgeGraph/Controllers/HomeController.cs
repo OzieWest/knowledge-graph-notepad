@@ -13,12 +13,22 @@ namespace KnowledgeGraph.Controllers
 			return View();
 		}
 
-		public ActionResult ViewTopic(string id)
+		public ActionResult Topic(string id)
 		{
 			if (string.IsNullOrEmpty(id))
 				return RedirectToAction("Index");
 
 			ViewBag.Id = id;
+
+			return View();
+		}
+
+		public ActionResult Category(string name)
+		{
+			if (string.IsNullOrEmpty(name))
+				return RedirectToAction("Index");
+
+			ViewBag.Name = name;
 
 			return View();
 		}

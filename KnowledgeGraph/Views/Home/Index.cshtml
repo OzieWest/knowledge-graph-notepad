@@ -19,11 +19,10 @@
 
 	<new-topic
 		parent="newTopic"
-		translate="Start new topic..."
 		on-add="onAddNewTopic()">
 	</new-topic>
 	
-	<table class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped" ng-show="topics.length">
 		<tr style="font-weight: bold;">
 			<td>#</td>
 			<td>
@@ -42,12 +41,12 @@
 				<a href class="text-success">{{ topic.Category }}</a>
 			</td>
 			<td>
-				<a href="home/viewtopic?id={{ topic.Id }}">{{ topic.Title }}</a>
+				<a href="home/topic?id={{ topic.Id }}">{{ topic.Title }}</a>
 			</td>
 			<td style="width: 170px;">{{ topic.Created | date:'medium' }}</td>
 			<td>{{ topic.Connections.length }}</td>
 			<td>
-				<a ng-click="delelePost(topic.Id)" title="Delete post"><i class="icon-trash"></i></a>
+				<a ng-click="deleleTopic(topic.Id)" title="Delete post"><i class="icon-trash"></i></a>
 			</td>
 		</tr>
 	</table>
@@ -60,9 +59,10 @@
 		(function (ng, show) {
 			'use strict';
 			
-			var app = ng.module('app.page-index', ['app.service', 'app.directive', 'ngSanitize']);
+			var app = ng.module('app.page-index', ['package.main']);
 
-			app.controller('ctrl.page-index', function($scope, repoTopics) {
+			app.controller('ctrl.page-index', ['$scope', 'topicRepository', 
+				function ($scope, repo) {
 				var that = this;
 				
 				$scope.topics = [];
@@ -83,14 +83,14 @@
 
 				$scope.onAddNewTopic = function() {
 					var newTopicId = $scope.newTopic.Connections[0];
-					repoTopics.getById(newTopicId).then(function(res) {
+					repo.getById(newTopicId).then(function(res) {
 						$scope.topics.splice(0, 0, res);
 						that.clearTopic();
 					});
 				};
 
-				$scope.delelePost = function(id) {
-					repoTopics.del(id).then(function() {
+				$scope.deleleTopic = function(id) {
+					repo.del(id).then(function() {
 
 						var ind = _.map($scope.topics, function(e) {
 							return e.Id;
@@ -106,12 +106,12 @@
 				(function init () {
 					that.clearTopic();
 
-					repoTopics.getAll().then(function (r) {
+					repo.getAll().then(function (r) {
 						$scope.topics = ng.copy(r);
 						show.info('Load complete');
 					}, that.onError);
 				}());
-			});
+			}]);
 
 		})(angular, toastr);
 
