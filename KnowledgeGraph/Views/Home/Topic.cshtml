@@ -20,7 +20,7 @@
 }
 
 <div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
-
+	
 	<div ng-show="model.Id">
 
 		<new-topic
@@ -143,13 +143,14 @@
 				</tr>
 			</table>
 		</div>
+
 	</div>
 </div>
 
 @section scripts
 {
 	<script>
-		(function (ng, show) {
+		(function(ng, show) {
 			'use strict';
 
 			var id = '@Html.Raw(ViewBag.Id)';
@@ -157,21 +158,24 @@
 			var app = ng.module('app.page-view-topic', ['package.main']);
 
 			app.controller('ctrl.page-view-topic', ['$scope', 'topicRepository',
-				function ($scope, repo) {
+				function($scope, repo) {
 					var that = this;
+
+					$scope.currentCategory = {
+					};
 
 					// Topics ====================================================
 					$scope.model = {};
 					$scope.newModel = {};
 					$scope.isShowCreateBox = false;
 
-					$scope.deleleCurrentPost = function () {
-						repo.del($scope.model.Id).then(function () {
+					$scope.deleleCurrentPost = function() {
+						repo.del($scope.model.Id).then(function() {
 							window.location = "/";
 						}, that.onError);
 					};
 
-					$scope.switchView = function () {
+					$scope.switchView = function() {
 						$scope.isShowCreateBox = !$scope.isShowCreateBox;
 
 						if ($scope.isShowCreateBox) {
@@ -181,17 +185,17 @@
 						}
 					};
 
-					$scope.onAddNewTopic = function () {
-						repo.update(id, $scope.model).then(function () {
+					$scope.onAddNewTopic = function() {
+						repo.update(id, $scope.model).then(function() {
 							that.loadConnections($scope.model.Connections);
 						}, that.onError);
 					};
 
-					$scope.saveTopic = function () {
+					$scope.saveTopic = function() {
 						$scope.newModel.Links = $scope.model.Links;
 						$scope.newModel.Connections = $scope.model.Connections;
 
-						repo.update($scope.model.Id, $scope.newModel).then(function (status) {
+						repo.update($scope.model.Id, $scope.newModel).then(function(status) {
 							if (status) {
 
 								$scope.model.Category = $scope.newModel.Category;
@@ -213,10 +217,10 @@
 					// Connections ====================================================
 					$scope.connections = [];
 
-					$scope.breakConnections = function (conId) {
-						repo.breakConnections($scope.model.Id, [conId]).then(function (res) {
+					$scope.breakConnections = function(conId) {
+						repo.breakConnections($scope.model.Id, [conId]).then(function(res) {
 							if (res) {
-								var ind = _.map($scope.connections, function (e) {
+								var ind = _.map($scope.connections, function(e) {
 									return e.val;
 								}).indexOf(conId);
 
@@ -235,10 +239,10 @@
 					$scope.newLink = {};
 					$scope.isAddNewLink = false;
 
-					$scope.deleteLink = function (link) {
-						repo.deleteLink($scope.model.Id, link).then(function (res) {
+					$scope.deleteLink = function(link) {
+						repo.deleteLink($scope.model.Id, link).then(function(res) {
 							if (res) {
-								var ind = _.map($scope.model.Links, function (e) {
+								var ind = _.map($scope.model.Links, function(e) {
 									return e.Url;
 								}).indexOf(link.Url);
 
@@ -248,12 +252,12 @@
 						}, that.onError);
 					};
 
-					$scope.switchLinkView = function () {
+					$scope.switchLinkView = function() {
 						$scope.isAddNewLink = !$scope.isAddNewLink;
 					};
 
-					$scope.addNewLink = function () {
-						repo.addLink($scope.model.Id, $scope.newLink).then(function (res) {
+					$scope.addNewLink = function() {
+						repo.addLink($scope.model.Id, $scope.newLink).then(function(res) {
 							if (res) {
 								if (!$scope.model.Links) {
 									$scope.model.Links = [];
@@ -266,7 +270,7 @@
 						}, that.onError);
 					};
 
-					that.clearLink = function () {
+					that.clearLink = function() {
 						$scope.newLink = {
 							Title: '',
 							Url: ''
@@ -274,7 +278,7 @@
 					};
 
 					// Support ====================================================
-					that.onError = function (msg) {
+					that.onError = function(msg) {
 						console.log('Error', msg);
 						show.error(msg.Message, 'Error');
 					};
@@ -283,7 +287,7 @@
 					(function init() {
 						that.clearLink();
 
-						repo.getById(id).then(function (result) {
+						repo.getById(id).then(function(result) {
 							$scope.model = result;
 							if (!$scope.model.Connections) {
 								$scope.model.Connections = [];
@@ -293,8 +297,8 @@
 							}
 						}, that.onError);
 
-						that.loadConnections = function (data) {
-							repo.getPostsTitles(id, data).then(function (res) {
+						that.loadConnections = function(data) {
+							repo.getPostsTitles(id, data).then(function(res) {
 								$scope.connections = ng.copy(res);
 							}, that.onError);
 						};
@@ -302,4 +306,4 @@
 				}]);
 		}(angular, toastr));
 	</script>
-}
+	}

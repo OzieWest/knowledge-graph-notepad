@@ -8,7 +8,7 @@
 	<div ng-show="isView.NewTopic">
 		<div class="row-fluid">
 			<div class="span3">
-				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Category" placeholder="Category" />
+				<category-list model="currentCategory"></category-list>
 			</div>
 			<div class="span9">
 				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Title" placeholder="Title" />

@@ -9,6 +9,7 @@
 	<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
 	<link href="~/Content/bootstrap-responsive.min.css" rel="stylesheet" />
 	<link href="~/Content/toastr.min.css" rel="stylesheet" />
+	<link href="~/Content/select2.css" rel="stylesheet" />
 	<link href="~/Content/Site.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
@@ -33,13 +34,15 @@
 		}
 	</style>
 	@RenderSection("header", required: false)
-
-	<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+	
+	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="~/Scripts/underscore.js"></script>
 	<script src="~/Scripts/toastr.min.js"></script>
+	<script src="~/Scripts/select2.min.js"></script>
 
 	<script src="~/Scripts/angular.min.js"></script>
 	<script src="~/Scripts/angular-sanitize.min.js"></script>
+	<script src="~/Scripts/ui-select2.js"></script>
 	<script src="~/Scripts/textAngular.min.js"></script>
 	<script src="~/ngApp/app.service.js"></script>
 	<script src="~/ngApp/app.directives.js"></script>
@@ -48,7 +51,8 @@
 		angular.module('package.main', [
 			'app.service',
 			'app.directive',
-			'ngSanitize'
+			'ngSanitize',
+			'ui.select2'
 		]);
 	</script>
 </head>
