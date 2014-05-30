@@ -41,6 +41,17 @@
 			getById: function (id) {
 				return call("get", "topic/" + id);
 			},
+			getByCategory: function (category, count, offset) {
+				return call("post", "topic/0/Category/",
+					{
+						category: category, 
+						count: count, 
+						offset: offset
+					});
+			},
+			//getByStatus: function (statuses) {
+				//return call("post", "topic/" + id + "/Status", statuses);
+			//},
 			add: function (topic) {
 				return call("post", "topic", topic);
 			},

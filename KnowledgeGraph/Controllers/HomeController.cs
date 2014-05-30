@@ -8,8 +8,10 @@ namespace KnowledgeGraph.Controllers
 {
 	public class HomeController : Controller
 	{
-		public ActionResult Index()
+		public ActionResult Index(string category)
 		{
+			ViewBag.Category = category;
+
 			return View();
 		}
 
@@ -19,16 +21,6 @@ namespace KnowledgeGraph.Controllers
 				return RedirectToAction("Index");
 
 			ViewBag.Id = id;
-
-			return View();
-		}
-
-		public ActionResult Category(string name)
-		{
-			if (string.IsNullOrEmpty(name))
-				return RedirectToAction("Index");
-
-			ViewBag.Name = name;
 
 			return View();
 		}

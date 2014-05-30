@@ -1,5 +1,5 @@
 ﻿@{
-	ViewBag.Title = "View topic";
+	
 }
 
 @section header {
@@ -306,6 +306,8 @@
 							if ($scope.model.Connections.length) {
 								that.loadConnections($scope.model.Connections);
 							}
+
+							document.title = $scope.model.Title + ' ' + document.title;
 						}, that.onError);
 
 						that.loadConnections = function (data) {

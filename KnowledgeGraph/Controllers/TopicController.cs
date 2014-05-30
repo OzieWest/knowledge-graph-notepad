@@ -214,7 +214,7 @@ namespace KnowledgeGraph.Controllers
 						var _fLink = x.Links.First(l => l.Url == link.Url && l.Title == link.Title);
 						x.Links.Remove(_fLink);
 					});
-					
+
 					_session.SaveChanges();
 
 					return Request.CreateResponse(HttpStatusCode.OK, true);
@@ -235,7 +235,7 @@ namespace KnowledgeGraph.Controllers
 					var _firstTopic = _session.Load<Topic>("topics/" + id);
 					_firstTopic.IfNotNull(x =>
 					{
-						if(x.Links == null)
+						if (x.Links == null)
 							x.Links = new List<Link>();
 
 						x.Links.Add(link);
@@ -244,6 +244,37 @@ namespace KnowledgeGraph.Controllers
 					_session.SaveChanges();
 
 					return Request.CreateResponse(HttpStatusCode.OK, true);
+				}
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage Category(int id, dynamic data)
+		{
+			string _category = data.category;
+			int _count = data.count;
+			int _offset = data.offset;
+
+			using (var _store = new DocumentStore { Url = this.dbHost, DefaultDatabase = this.dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					var _result = _session.Query<Topic>()
+									.Where(x => x.Category == _category)
+									.OrderByDescending(x => x.Created)
+									.Skip(_offset)
+									.Take(_count)
+									.Select(x => new Topic
+									{
+										Id = x.Id,
+										Title = x.Title,
+										Category = x.Category,
+										Status = x.Status,
+										Created = x.Created,
+										Connections = x.Connections
+									});
+
+					return Request.CreateResponse(HttpStatusCode.OK, _result.ToList());
 				}
 			}
 		}
