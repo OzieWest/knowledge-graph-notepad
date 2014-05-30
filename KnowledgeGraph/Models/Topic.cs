@@ -22,6 +22,7 @@ namespace KnowledgeGraph.Models
 		public string Title { get; set; }
 		public string Value { get; set; }
 		public string Category { get; set; }
+		public string Status { get; set; }
 
 		public List<int> Connections { get; set; }
 		public List<Link> Links { get; set; }

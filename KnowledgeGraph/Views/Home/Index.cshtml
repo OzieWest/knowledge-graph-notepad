@@ -25,6 +25,7 @@
 	<table class="table table-bordered table-striped" ng-show="topics.length">
 		<tr style="font-weight: bold;">
 			<td>#</td>
+			<td style="width: 90px;">Status</td>
 			<td>
 				Category
 			</td>
@@ -33,12 +34,18 @@
 			</td>
 			<td style="width: 170px;">Created</td>
 			<td>Con</td>
+			
 			<td>#</td>
 		</tr>
 		<tr ng-repeat="topic in topics track by $index">
 			<td>{{ $index + 1 }}</td>
 			<td>
-				<a href class="text-success">{{ topic.Category }}</a>
+				<span ng-if="topic.Status == 'Изучен'" class="text-success">{{ topic.Status }}</span>
+				<span ng-if="topic.Status == 'Ожидает'" class="text-warning">{{ topic.Status }}</span>
+				<span ng-if="topic.Status == 'В процессе'" class="text-error">{{ topic.Status }}</span>
+			</td>
+			<td>
+				<a href class="text-info">{{ topic.Category }}</a>
 			</td>
 			<td>
 				<a href="home/topic?id={{ topic.Id }}">{{ topic.Title }}</a>

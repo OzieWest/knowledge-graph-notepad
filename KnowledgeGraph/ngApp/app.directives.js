@@ -13,8 +13,9 @@
 			templateUrl: '../templates/tmpl.directive.new-topic.html?1',
 			controller: function ($scope, topicRepository) {
 				var that = this;
-				$scope.currentCategory = {};
-				
+				$scope.currentCategory = { id: 0, text: 'Общее' };
+				$scope.currentStatus = { id: 0, text: 'Ожидает' };
+
 				$scope.newTopicId = 0;
 				$scope.isView = {
 					NewTopic: false,
@@ -52,10 +53,11 @@
 				};
 
 				that.checkModel = function () {
-					if (!$scope.currentCategory.text) {
+					if (!$scope.currentCategory.text || !$scope.currentStatus.text) {
 						return false;
 					} else {
 						$scope.model.Category = $scope.currentCategory.text;
+						$scope.model.Status = $scope.currentStatus.text;
 					}
 
 					$scope.model.Connections.push($scope.parent.Id);
@@ -130,11 +132,44 @@
 				$scope.categoryOptions = {
 					minimumInputLength: 0,
 					placeholder: "Search category...",
-					width: 250,
+					width: 270,
 					query: function (query) {
 						//console.log(query.term);
 						var data = {};
 						data.results = $scope.categories;
+						query.callback(data);
+					},
+					initSelection: function (element, callback) {
+					}
+				};
+			}
+		};
+	});
+	
+	app.directive('statusList', function () {
+		return {
+			replace: true,
+			restrict: 'E',
+			scope: {
+				model: "=",
+			},
+			template: '<input type="text" ui-select2="options" ng-model="model">',
+			controller: function ($scope) {
+				var that = this;
+
+				var results = [
+					{ id: 0, text: "Ожидает" },
+					{ id: 1, text: "В процессе" },
+					{ id: 2, text: "Изучен" },
+				];
+
+				$scope.options = {
+					minimumInputLength: 0,
+					placeholder: "Choose status...",
+					width: 270,
+					query: function (query) {
+						var data = {};
+						data.results = results;
 						query.callback(data);
 					},
 					initSelection: function (element, callback) {

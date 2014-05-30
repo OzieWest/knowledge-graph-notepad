@@ -7,11 +7,14 @@
 
 	<div ng-show="isView.NewTopic">
 		<div class="row-fluid">
+			<div class="span6">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Title" placeholder="Title" />
+			</div>
 			<div class="span3">
 				<category-list model="currentCategory"></category-list>
 			</div>
-			<div class="span9">
-				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Title" placeholder="Title" />
+			<div class="span3">
+				<status-list model="currentStatus"></status-list>
 			</div>
 		</div>
 

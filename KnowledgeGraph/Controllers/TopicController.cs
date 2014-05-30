@@ -105,6 +105,7 @@ namespace KnowledgeGraph.Controllers
 						_result.Title = oldTopic.Title;
 						_result.Value = oldTopic.Value;
 						_result.Category = oldTopic.Category;
+						_result.Status = oldTopic.Status;
 
 						_result.Connections = oldTopic.Connections;
 						_result.Links = oldTopic.Links;
