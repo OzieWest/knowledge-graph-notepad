@@ -29,7 +29,7 @@
 					};
 				};
 
-				that.clearTopic = function() {
+				that.clearTopic = function () {
 					$scope.model = {
 						Title: '',
 						Value: '',
@@ -73,7 +73,7 @@
 					if (that.checkModel()) {
 						topicRepository.add($scope.model).then(function (res) {
 							$scope.newTopicId = res;
-							
+
 							that.updateParentLink();
 							that.clearTopic();
 
@@ -88,7 +88,7 @@
 						$scope.model.Links.push($scope.newLink);
 						that.clearLink();
 					} else {
-						show.error('Incorrect link!','Error');
+						show.error('Incorrect link!', 'Error');
 					}
 				};
 
@@ -107,7 +107,7 @@
 			}
 		};
 	});
-	
+
 	app.directive('categoryList', function () {
 		return {
 			replace: true,
@@ -118,7 +118,7 @@
 			template: '<input type="text" ui-select2="categoryOptions" ng-model="model">',
 			controller: function ($scope) {
 				var that = this;
-				
+
 				$scope.categories = [
 					{ id: 0, text: "Общее" },
 					{ id: 1, text: "Алгоритмы" },
@@ -145,7 +145,7 @@
 			}
 		};
 	});
-	
+
 	app.directive('statusList', function () {
 		return {
 			replace: true,
@@ -171,6 +171,44 @@
 						var data = {};
 						data.results = results;
 						query.callback(data);
+					},
+					initSelection: function (element, callback) {
+					}
+				};
+			}
+		};
+	});
+
+	app.directive('searchByTitle', function () {
+		return {
+			replace: true,
+			restrict: 'E',
+			scope: {
+				model: "=",
+			},
+			template: '<input type="text" ui-select2="options" ng-model="model">',
+			controller: function ($scope, topicRepository) {
+				var that = this;
+
+				var search = _.debounce(function (query) {
+					topicRepository.search(query.term, 10, 0, 'Id.Title').then(function(result) {
+						var data = {};
+						data.results = _.map(result, function(e) {
+							return {
+								id: e.Id,
+								text: e.Title
+							};
+						});
+						query.callback(data);
+					});
+				}, 1200);
+
+				$scope.options = {
+					minimumInputLength: 3,
+					placeholder: "Search by title...",
+					width: 270,
+					query: function (query) {
+						search(query);
 					},
 					initSelection: function (element, callback) {
 					}

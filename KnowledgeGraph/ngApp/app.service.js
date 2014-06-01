@@ -49,9 +49,15 @@
 						offset: offset
 					});
 			},
-			//getByStatus: function (statuses) {
-				//return call("post", "topic/" + id + "/Status", statuses);
-			//},
+			search: function (search, count, offset, partial) {
+				return call("post", "topic/0/Search/",
+					{
+						search: search, 
+						count: count, 
+						offset: offset,
+						partial: partial
+					});
+			},
 			add: function (topic) {
 				return call("post", "topic", topic);
 			},
@@ -64,8 +70,13 @@
 			getPostsTitles: function (id, arrayId) {
 				return call("post", "topic/" + id + "/GetPostsTitles", arrayId);
 			},
-			breakConnections: function (id, conId) {
-				return call("post", "topic/" + id + "/BreakConnections", conId);
+			connections: {
+				del: function (id, conId) {
+					return call("post", "topic/" + id + "/BreakConnections", conId);
+				},
+				add: function (id, conId) {
+					return call("post", "topic/" + id + "/AddConnection", { conId: conId });
+				}
 			},
 			deleteLink: function (id, link) {
 				return call("post", "topic/" + id + "/DeleteLink", link);

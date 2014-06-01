@@ -16,7 +16,6 @@
 }
 
 <div ng-app="app.page-index" ng-controller="ctrl.page-index">
-
 	<new-topic
 		parent="newTopic"
 		on-add="onAddNewTopic()">
@@ -119,13 +118,12 @@
 						if (viewbag.category) {
 							repo.getByCategory(viewbag.category, 20, 0).then(function (r) {
 								$scope.topics = ng.copy(r);
-								show.info('Load complete');
+								document.title = viewbag.category;
 							}, that.onError);
 						}
 						else {
 							repo.getAll().then(function (r) {
 								$scope.topics = ng.copy(r);
-								show.info('Load complete');
 							}, that.onError);
 						}
 					}());

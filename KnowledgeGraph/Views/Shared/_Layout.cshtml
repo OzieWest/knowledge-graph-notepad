@@ -10,6 +10,7 @@
 	<link href="~/Content/bootstrap-responsive.min.css" rel="stylesheet" />
 	<link href="~/Content/toastr.min.css" rel="stylesheet" />
 	<link href="~/Content/select2.css" rel="stylesheet" />
+	<link href="~/Content/loading-bar.css" rel="stylesheet" />
 	<link href="~/Content/Site.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
@@ -42,17 +43,21 @@
 
 	<script src="~/Scripts/angular.min.js"></script>
 	<script src="~/Scripts/angular-sanitize.min.js"></script>
+	<script src="https://code.angularjs.org/1.2.16/angular-animate.min.js"></script>
 	<script src="~/Scripts/ui-select2.js"></script>
 	<script src="~/Scripts/textAngular.min.js"></script>
+	<script src="~/Scripts/loading-bar.js"></script>
 	<script src="~/ngApp/app.service.js"></script>
 	<script src="~/ngApp/app.directives.js"></script>
-
+	
 	<script>
 		angular.module('package.main', [
 			'app.service',
 			'app.directive',
 			'ngSanitize',
-			'ui.select2'
+			'ui.select2',
+			'angular-loading-bar',
+			'ngAnimate'
 		]);
 	</script>
 </head>

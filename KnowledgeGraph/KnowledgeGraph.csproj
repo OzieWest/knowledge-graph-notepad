@@ -195,6 +195,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\HelperExtensions.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\Topic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -202,6 +203,8 @@
   <ItemGroup>
     <Content Include="Content\bootstrap-responsive.min.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\loading-bar.css" />
+    <Content Include="Scripts\loading-bar.js" />
     <Content Include="Content\select2-spinner.gif" />
     <Content Include="Content\select2.css" />
     <Content Include="Content\select2.png" />

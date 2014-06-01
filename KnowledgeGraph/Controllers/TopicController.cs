@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.ModelBinding;
 using KnowledgeGraph.Models;
 using Raven.Client;
 using Raven.Client.Document;
+using System.Linq.Expressions;
 
 namespace KnowledgeGraph.Controllers
 {
@@ -34,6 +37,15 @@ namespace KnowledgeGraph.Controllers
 											.OrderByDescending(x => x.Created)
 											.Skip(offset)
 											.Take(count)
+											.Select(x => new Topic
+											{
+												Id = x.Id,
+												Title = x.Title,
+												Connections = x.Connections,
+												Category = x.Category,
+												Status = x.Status,
+												Created = x.Created
+											})
 											.ToList();
 
 					return Request.CreateResponse(HttpStatusCode.OK, _result);
@@ -175,6 +187,7 @@ namespace KnowledgeGraph.Controllers
 			}
 		}
 
+		#region Connections
 		[HttpPost]
 		public HttpResponseMessage BreakConnections(int id, int[] conId)
 		{
@@ -197,6 +210,28 @@ namespace KnowledgeGraph.Controllers
 				}
 			}
 		}
+
+		[HttpPost]
+		public HttpResponseMessage AddConnection(int id, dynamic data)
+		{
+			int _conId = data.conId;
+			if (id <= 0 || _conId <= 0)
+				return Bad("ID and ConID should be more than 0");
+
+			return Session(s =>
+			{
+				var _firstTopic = s.Load<Topic>("topics/" + id);
+				_firstTopic.IfNotNull(x => x.Connections.Add(_conId));
+
+				var _secondTopic = s.Load<Topic>("topics/" + _conId);
+				_secondTopic.IfNotNull(x => x.Connections.Add(id));
+
+				s.SaveChanges();
+
+				return Good(true);
+			});
+		}
+		#endregion Connections
 
 		[HttpPost]
 		public HttpResponseMessage DeleteLink(int id, Link link)
@@ -226,26 +261,23 @@ namespace KnowledgeGraph.Controllers
 		public HttpResponseMessage AddLink(int id, Link link)
 		{
 			if (id <= 0 || link == null)
-				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "ID and Links should be more than 0");
+				return Bad("ID and Links should be more than 0");
 
-			using (var _store = new DocumentStore { Url = dbHost, DefaultDatabase = dbBase }.Initialize())
+			return Session(s =>
 			{
-				using (var _session = _store.OpenSession())
+				var _firstTopic = s.Load<Topic>("topics/" + id);
+				_firstTopic.IfNotNull(x =>
 				{
-					var _firstTopic = _session.Load<Topic>("topics/" + id);
-					_firstTopic.IfNotNull(x =>
-					{
-						if (x.Links == null)
-							x.Links = new List<Link>();
+					if (x.Links == null)
+						x.Links = new List<Link>();
 
-						x.Links.Add(link);
-					});
+					x.Links.Add(link);
+				});
 
-					_session.SaveChanges();
+				s.SaveChanges();
 
-					return Request.CreateResponse(HttpStatusCode.OK, true);
-				}
-			}
+				return Good(true);
+			});
 		}
 
 		[HttpPost]
@@ -255,34 +287,101 @@ namespace KnowledgeGraph.Controllers
 			int _count = data.count;
 			int _offset = data.offset;
 
-			using (var _store = new DocumentStore { Url = this.dbHost, DefaultDatabase = this.dbBase }.Initialize())
+			return Session(s =>
 			{
-				using (var _session = _store.OpenSession())
-				{
-					var _result = _session.Query<Topic>()
-									.Where(x => x.Category == _category)
-									.OrderByDescending(x => x.Created)
-									.Skip(_offset)
-									.Take(_count)
-									.Select(x => new Topic
-									{
-										Id = x.Id,
-										Title = x.Title,
-										Category = x.Category,
-										Status = x.Status,
-										Created = x.Created,
-										Connections = x.Connections
-									});
+				var _result = s.Query<Topic>()
+								.Where(x => x.Category == _category)
+								.OrderByDescending(x => x.Created)
+								.Skip(_offset)
+								.Take(_count)
+								.Select(x => new Topic
+								{
+									Id = x.Id,
+									Title = x.Title,
+									Category = x.Category,
+									Status = x.Status,
+									Created = x.Created,
+									Connections = x.Connections
+								}).ToList();
 
-					return Request.CreateResponse(HttpStatusCode.OK, _result.ToList());
-				}
-			}
+				return Good(_result);
+			});
+		}
+
+		[HttpPost]
+		public HttpResponseMessage Search(int id, dynamic data)
+		{
+			return Session(_session =>
+			{
+				string _titleSubstring = data.search;
+				int _count = data.count;
+				int _offset = data.offset;
+				string _partial = data.partial;
+
+				var _result = _session.Query<Topic>()
+					.Search(x => x.Title, string.Format("*{0}*", _titleSubstring), escapeQueryOptions: EscapeQueryOptions.RawQuery)
+					.OrderByDescending(x => x.Created)
+					.Skip(_offset)
+					.Take(_count)
+					.Select(SelectFunc<Topic>(_partial))
+					.ToList();
+
+				return Good(_result);
+			});
+		}
+
+		#region Support
+
+		private HttpResponseMessage Good(object response)
+		{
+			return Request.CreateResponse(HttpStatusCode.OK, response);
+		}
+
+		private HttpResponseMessage Bad(string message, HttpStatusCode status = HttpStatusCode.BadRequest)
+		{
+			return Request.CreateErrorResponse(status, message);
 		}
 
 		private bool CheckModel(Topic topic)
 		{
 			return topic != null && !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
 		}
+
+		private HttpResponseMessage Session(Func<IDocumentSession, HttpResponseMessage> action)
+		{
+			using (var _store = new DocumentStore { Url = this.dbHost, DefaultDatabase = this.dbBase }.Initialize())
+			{
+				using (var _session = _store.OpenSession())
+				{
+					return action(_session);
+				}
+			}
+		}
+
+		private Func<T, T> SelectFunc<T>(string fields) where T : Topic
+		{
+			var xParameter = Expression.Parameter(typeof(T), "o");
+
+			var xNew = Expression.New(typeof(T));
+
+			var bindings = fields.Split('.').Select(o => o.Trim())
+				.Select(o =>
+				{
+					var mi = typeof(T).GetProperty(o);
+
+					var xOriginal = Expression.Property(xParameter, mi);
+
+					return Expression.Bind(mi, xOriginal);
+				}
+			);
+
+			var xInit = Expression.MemberInit(xNew, bindings);
+
+			var lambda = Expression.Lambda<Func<T, T>>(xInit, xParameter);
+
+			return lambda.Compile();
+		}
+		#endregion Support
 	}
 
 	public class TitleResponse
