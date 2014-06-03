@@ -17,11 +17,11 @@
 
 <div ng-app="app.page-index" ng-controller="ctrl.page-index">
 	<new-topic
-		parent="newTopic"
-		on-add="onAddNewTopic()">
+		parent="newTopic.data"
+		on-add="newTopic.onAdd()">
 	</new-topic>
 	
-	<table class="table table-bordered table-striped" ng-show="topics.length">
+	<table class="table table-bordered table-striped" ng-show="topics.data.length">
 		<tr style="font-weight: bold;">
 			<td>#</td>
 			<td style="width: 90px;">Status</td>
@@ -36,7 +36,7 @@
 			
 			<td>#</td>
 		</tr>
-		<tr ng-repeat="topic in topics track by $index">
+		<tr ng-repeat="topic in topics.data track by $index">
 			<td>{{ $index + 1 }}</td>
 			<td>
 				<span ng-if="topic.Status == 'Изучен'" class="muted">{{ topic.Status }}</span>
@@ -52,7 +52,7 @@
 			<td style="width: 170px;">{{ topic.Created | date:'medium' }}</td>
 			<td>{{ topic.Connections.length }}</td>
 			<td>
-				<a ng-click="deleleTopic(topic.Id)" title="Delete post"><i class="icon-trash"></i></a>
+				<a ng-click="topics.del(topic.Id)" title="Delete post"><i class="icon-trash"></i></a>
 			</td>
 		</tr>
 	</table>
@@ -65,66 +65,71 @@
 		var viewbag = {
 			category: '@Html.Raw(ViewBag.Category)'
 		};
-		
-		(function (ng, show) {
+
+		(function(ng, show) {
 			'use strict';
-			
+
 			var app = ng.module('app.page-index', ['package.main']);
 
-			app.controller('ctrl.page-index', ['$scope', 'topicRepository', 
-				function ($scope, repo) {
-					var that = this;
-				
-					$scope.topics = [];
-					$scope.newTopic = {};
+			app.controller('ctrl.page-index', ['$scope', 'topicRepository',
+				function($scope, repo) {
+					var ctrl = this;
 
-					that.onError = function (err) {
+					ctrl.onError = function(err) {
 						show.error(err.message, 'Error');
 						console.log('Error', err);
 					};
-				
-					that.clearTopic = function() {
-						$scope.newTopic = {
-							id: 0,
-							Connections: [],
-							Category: 'Общее',
-						};
+
+
+					// -------------------------------------------------------
+					$scope.newTopic = {
+						data: {},
+						clear: function() {
+							this.data = {
+								id: 0,
+								Connections: [],
+								Category: 'Общее',
+							};
+						},
+						onAdd: function() {
+							var that = this;
+							var id = that.data.Connections[0];
+							repo.getById(id).then(function(res) {
+								$scope.topics.data.splice(0, 0, res);
+								that.clear();
+							}, ctrl.onError);
+						}
+					};
+					$scope.newTopic.clear();
+
+
+					// -------------------------------------------------------
+					$scope.topics = {
+						data: [],
+						del: function (id) {
+							var that = this;
+							repo.del(id).then(function() {
+								var ind = _.map(that.data, function (e) {
+									return e.Id;
+								}).indexOf(id);
+								that.data.splice(ind, 1);
+								show.success('Topic deleted!', 'Success');
+							}, ctrl.onError);
+						}
 					};
 
-					$scope.onAddNewTopic = function() {
-						var newTopicId = $scope.newTopic.Connections[0];
-						repo.getById(newTopicId).then(function(res) {
-							$scope.topics.splice(0, 0, res);
-							that.clearTopic();
-						});
-					};
-
-					$scope.deleleTopic = function(id) {
-						repo.del(id).then(function() {
-
-							var ind = _.map($scope.topics, function(e) {
-								return e.Id;
-							}).indexOf(id);
-
-							$scope.topics.splice(ind, 1);
-
-							show.success('Topic deleted!', 'Success');
-						}, that.onError);
-					};
 
 					// INIT -------------------------------------------
-					(function init () {
-						that.clearTopic();
+					(function init() {
 						if (viewbag.category) {
-							repo.getByCategory(viewbag.category, 20, 0).then(function (r) {
-								$scope.topics = ng.copy(r);
+							repo.getByCategory(viewbag.category, 20, 0).then(function(r) {
+								$scope.topics.data = ng.copy(r);
 								document.title = viewbag.category;
-							}, that.onError);
-						}
-						else {
-							repo.getAll().then(function (r) {
-								$scope.topics = ng.copy(r);
-							}, that.onError);
+							}, ctrl.onError);
+						} else {
+							repo.getAll(20, 0, 'Id.Category.Status.Title.Created.Connections').then(function(r) {
+								$scope.topics.data = ng.copy(r);
+							}, ctrl.onError);
 						}
 					}());
 				}]);

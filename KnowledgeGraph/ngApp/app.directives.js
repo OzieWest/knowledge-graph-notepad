@@ -13,7 +13,7 @@
 			templateUrl: '../templates/tmpl.directive.new-topic.html?1',
 			controller: function ($scope, topicRepository) {
 				var that = this;
-				$scope.currentCategory = { id: 0, text: 'Общее' };
+				//$scope.currentCategory = { id: 0, text: 'Общее' };
 				$scope.currentStatus = { id: 0, text: 'Ожидает' };
 
 				$scope.newTopicId = 0;
@@ -53,10 +53,9 @@
 				};
 
 				that.checkModel = function () {
-					if (!$scope.currentCategory.text || !$scope.currentStatus.text) {
+					if (!$scope.currentStatus.text) {
 						return false;
 					} else {
-						$scope.model.Category = $scope.currentCategory.text;
 						$scope.model.Status = $scope.currentStatus.text;
 					}
 
@@ -127,6 +126,8 @@
 					{ id: 4, text: "Математика" },
 					{ id: 5, text: "История" },
 					{ id: 6, text: "Физика" },
+					{ id: 7, text: "География" },
+					{ id: 8, text: "Литература" },
 				];
 
 				$scope.categoryOptions = {

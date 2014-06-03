@@ -35,8 +35,8 @@
 		};
 
 		return {
-			getAll: function () {
-				return call("get", "topic");
+			getAll: function (count, offset, partial) {
+				return call("get", "topic?" + "count=" + count + "&offset=" + offset + "&partial=" + partial);
 			},
 			getById: function (id) {
 				return call("get", "topic/" + id);
@@ -67,12 +67,12 @@
 			update: function (id, topic) {
 				return call("put", "topic/" + id, topic);
 			},
-			getPostsTitles: function (id, arrayId) {
-				return call("post", "topic/" + id + "/GetPostsTitles", arrayId);
+			titles: function (id, arrayId) {
+				return call("post", "topic/" + id + "/Titles", arrayId);
 			},
 			connections: {
 				del: function (id, conId) {
-					return call("post", "topic/" + id + "/BreakConnections", conId);
+					return call("post", "topic/" + id + "/DeleteConnections", { conId: conId });
 				},
 				add: function (id, conId) {
 					return call("post", "topic/" + id + "/AddConnection", { conId: conId });
