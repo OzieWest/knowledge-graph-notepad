@@ -35,19 +35,11 @@
 		};
 
 		return {
-			getAll: function (count, offset, partial) {
-				return call("get", "topic?" + "count=" + count + "&offset=" + offset + "&partial=" + partial);
+			getAll: function (count, offset, category, partial) {
+				return call("get", "topic?" + "count=" + count + "&offset=" + offset + "&partial=" + partial + "&category=" + category);
 			},
 			getById: function (id) {
 				return call("get", "topic/" + id);
-			},
-			getByCategory: function (category, count, offset) {
-				return call("post", "topic/0/Category/",
-					{
-						category: category, 
-						count: count, 
-						offset: offset
-					});
 			},
 			search: function (search, count, offset, partial) {
 				return call("post", "topic/0/Search/",

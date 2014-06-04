@@ -12,10 +12,20 @@
 		.full-size {
 			width: 100%;
 		}
+
+		.mainTitle {
+			margin: 20px 0px;
+			font-size: 30px;
+			font-family: monospace;
+		}
+
 	</style>
 }
 
-<div ng-app="app.page-index" ng-controller="ctrl.page-index">
+<div ng-app="app.page-index" ng-controller="ctrl.page-index" ng-cloak class="ng-cloak">
+	
+	<div class="mainTitle"><a ng-click="toMain()">GraphPad</a></div>
+
 	<new-topic
 		parent="newTopic.data"
 		on-add="newTopic.onAdd()">
@@ -44,7 +54,7 @@
 				<span ng-if="topic.Status == 'В процессе'" class="text-error">{{ topic.Status }}</span>
 			</td>
 			<td>
-				<a href="?category={{ topic.Category }}" class="text-info">{{ topic.Category }}</a>
+				<a ng-click="byCategory(topic.Category)" class="text-info">{{ topic.Category }}</a>
 			</td>
 			<td>
 				<a href="home/topic?id={{ topic.Id }}">{{ topic.Title }}</a>
@@ -57,14 +67,15 @@
 		</tr>
 	</table>
 	
+	<div style="margin-bottom: 50px;" ng-if="topics.all > 20">
+		<a ng-show="config.offset != 0" ng-click="next()">< Вперед</a> <a ng-hide="config.offset + config.count >= topics.all" ng-click="back()">Назад ></a>
+	</div>
+	
 </div>
 
 @section scripts
 {
 	<script>
-		var viewbag = {
-			category: '@Html.Raw(ViewBag.Category)'
-		};
 
 		(function(ng, show) {
 			'use strict';
@@ -74,6 +85,13 @@
 			app.controller('ctrl.page-index', ['$scope', 'topicRepository',
 				function($scope, repo) {
 					var ctrl = this;
+					$scope.config = {
+						offset: 0,
+						count: 20,
+						fields: 'Id.Category.Status.Title.Created.Connections',
+						category: '',
+						busy: true
+					};
 
 					ctrl.onError = function(err) {
 						show.error(err.message, 'Error');
@@ -106,32 +124,54 @@
 					// -------------------------------------------------------
 					$scope.topics = {
 						data: [],
-						del: function (id) {
+						del: function(id) {
 							var that = this;
 							repo.del(id).then(function() {
-								var ind = _.map(that.data, function (e) {
+								var ind = _.map(that.data, function(e) {
 									return e.Id;
 								}).indexOf(id);
 								that.data.splice(ind, 1);
 								show.success('Topic deleted!', 'Success');
 							}, ctrl.onError);
-						}
+						},
+						all: 0
 					};
 
+					var dbGetAll = function() {
+						var count = $scope.config.count;
+						var offset = $scope.config.offset;
+						var fields = $scope.config.fields;
+						var category = $scope.config.category;
+
+						return repo.getAll(count, offset, category, fields).then(function(r) {
+							$scope.topics.data = ng.copy(r.data);
+							$scope.topics.all = r.all;
+						}, ctrl.onError);
+					};
+
+					$scope.toMain = function () {
+						$scope.config.offset = 0;
+						$scope.config.category = '';
+						dbGetAll();
+					};
+
+					$scope.byCategory = function(cat) {
+						$scope.config.category = cat;
+						dbGetAll();
+					};
+
+					$scope.next = function () {
+						$scope.config.offset = $scope.config.offset - $scope.config.count;
+						dbGetAll();
+					};
+
+					$scope.back = function () {
+						$scope.config.offset = $scope.config.count + $scope.config.offset;
+						dbGetAll();
+					};
 
 					// INIT -------------------------------------------
-					(function init() {
-						if (viewbag.category) {
-							repo.getByCategory(viewbag.category, 20, 0).then(function(r) {
-								$scope.topics.data = ng.copy(r);
-								document.title = viewbag.category;
-							}, ctrl.onError);
-						} else {
-							repo.getAll(20, 0, 'Id.Category.Status.Title.Created.Connections').then(function(r) {
-								$scope.topics.data = ng.copy(r);
-							}, ctrl.onError);
-						}
-					}());
+					dbGetAll();
 				}]);
 
 		})(angular, toastr);

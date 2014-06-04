@@ -9,6 +9,7 @@ namespace KnowledgeGraph.Models
 	public class Link
 	{
 		public String Title { get; set; }
+		public String Type { get; set; }
 		public String Url { get; set; }
 	}
 

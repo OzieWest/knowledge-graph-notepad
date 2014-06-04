@@ -18,16 +18,39 @@ namespace KnowledgeGraph.Controllers
 	{
 		// GET api/topic
 		[ActionName("DefaultAction")]
-		public HttpResponseMessage Get(int count = 25, int offset = 0, string partial = "")
+		public HttpResponseMessage Get(int count = 25, int offset = 0, string category = "", string partial = "")
 		{
 			return Open(session =>
 			{
-				var _result = session.Query<Topic>()
-					.OrderByDescending(x => x.Created)
-					.Skip(offset)
-					.Take(count);
+				IQueryable<Topic> _data = null;
 
-				return Good(CheckResult(_result, partial));
+				var _query = session.Query<Topic>();
+				var _allCount = 0;
+				
+				if (!String.IsNullOrEmpty(category))
+				{
+					_data = _query.Where(x => x.Category == category)
+						.OrderByDescending(x => x.Created);
+
+					_allCount = session.Query<Topic>().Count(x => x.Category == category);
+				}
+				else
+				{
+					_data = _query.OrderByDescending(x => x.Created);
+					_allCount = session.Query<Topic>().Count();
+				}
+
+				_data = _data.Skip(offset).Take(count);
+
+				var _result = new
+				{
+					data = CheckResult(_data, partial),
+					count = count,
+					offset = offset,
+					all = _allCount
+				};
+
+				return Good(_result);
 			});
 		}
 
@@ -238,26 +261,6 @@ namespace KnowledgeGraph.Controllers
 			});
 		}
 		#endregion Links
-
-		[HttpPost]
-		public HttpResponseMessage Category(int id, dynamic data)
-		{
-			string _category = data.category;
-			int _count = data.count;
-			int _offset = data.offset;
-			string _partial = data.partial;
-
-			return Open(session =>
-			{
-				var _result = session.Query<Topic>()
-					.Where(x => x.Category == _category)
-					.OrderByDescending(x => x.Created)
-					.Skip(_offset)
-					.Take(_count);
-
-				return Good(CheckResult(_result, _partial));
-			});
-		}
 
 		[HttpPost]
 		public HttpResponseMessage Search(int id, dynamic data)
