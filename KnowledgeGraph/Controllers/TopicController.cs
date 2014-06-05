@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.ModelBinding;
 using KnowledgeGraph.Models;
+using Newtonsoft.Json.Linq;
 using Raven.Client;
 using Raven.Client.Document;
 using System.Linq.Expressions;
@@ -16,9 +17,8 @@ namespace KnowledgeGraph.Controllers
 {
 	public class TopicController : BaseApiController
 	{
-		// GET api/topic
-		[ActionName("DefaultAction")]
-		public HttpResponseMessage Get(int count = 25, int offset = 0, string category = "", string partial = "")
+		[HttpGet]
+		public HttpResponseMessage GetAll(int count = 25, int offset = 0, string category = "", string partial = "")
 		{
 			return Open(session =>
 			{
@@ -44,7 +44,7 @@ namespace KnowledgeGraph.Controllers
 
 				var _result = new
 				{
-					data = CheckResult(_data, partial),
+					data = _data.AsPartial(partial),
 					count = count,
 					offset = offset,
 					all = _allCount
@@ -54,9 +54,8 @@ namespace KnowledgeGraph.Controllers
 			});
 		}
 
-		// GET api/topic/5
-		[ActionName("DefaultAction")]
-		public HttpResponseMessage Get(int id)
+		[HttpGet]
+		public HttpResponseMessage GetById(int id)
 		{
 			if (id <= 0)
 				return Bad("Id should be more than 0");
@@ -72,45 +71,48 @@ namespace KnowledgeGraph.Controllers
 			});
 		}
 
-		// POST api/topic
-		[ActionName("DefaultAction")]
-		public HttpResponseMessage Post(Topic newTopic)
+		[HttpPost]
+		public HttpResponseMessage AddTopic(JObject data)
 		{
-			if (!CheckModel(newTopic))
+			var _newTopic = data.As<Topic>("topic");
+
+			if (!CheckModel(_newTopic))
 				return Bad("Not correct topic structure");
 
 			return Open(session =>
 			{
-				newTopic.Created = DateTime.UtcNow;
-				newTopic.Modified = DateTime.UtcNow;
+				_newTopic.Created = DateTime.UtcNow;
+				_newTopic.Modified = DateTime.UtcNow;
 
-				session.Store(newTopic);
+				session.Store(_newTopic);
 				session.SaveChanges();
 
-				return Good(newTopic.Id, HttpStatusCode.Created);
+				return Good(_newTopic.Id, HttpStatusCode.Created);
 			});
 		}
 
-		// PUT api/topic/5
-		[ActionName("DefaultAction")]
-		public HttpResponseMessage Put(int id, Topic oldTopic)
+		[HttpPost]
+		public HttpResponseMessage UpdateTopic(JObject data)
 		{
-			if (id <= 0 && !CheckModel(oldTopic))
+			var _id = data.As<int>("id");
+			var _oldTopic = data.As<Topic>("topic");
+
+			if (_id <= 0 && !CheckModel(_oldTopic))
 				return Bad("Wrong parameters");
 
 			return Open(session =>
 			{
-				var _result = session.Load<Topic>("topics/" + id);
+				var _result = session.Load<Topic>("topics/" + _id);
 
 				_result.Modified = DateTime.UtcNow;
 
-				_result.Title = oldTopic.Title;
-				_result.Value = oldTopic.Value;
-				_result.Category = oldTopic.Category;
-				_result.Status = oldTopic.Status;
+				_result.Title = _oldTopic.Title;
+				_result.Value = _oldTopic.Value;
+				_result.Category = _oldTopic.Category;
+				_result.Status = _oldTopic.Status;
 
-				_result.Connections = oldTopic.Connections;
-				_result.Links = oldTopic.Links;
+				_result.Connections = _oldTopic.Connections;
+				_result.Links = _oldTopic.Links;
 
 				session.SaveChanges();
 
@@ -118,16 +120,17 @@ namespace KnowledgeGraph.Controllers
 			});
 		}
 
-		// DELETE api/topic/5
-		[ActionName("DefaultAction")]
-		public HttpResponseMessage Delete(int id)
+		[HttpPost]
+		public HttpResponseMessage DeleteTopic(JObject data)
 		{
-			if (id <= 0)
+			int _id = data.As<int>("id");;
+
+			if (_id <= 0)
 				return Bad("Id should be more than 0");
 
 			return Open(session =>
 			{
-				var _result = session.Load<Topic>("topics/" + id);
+				var _result = session.Load<Topic>("topics/" + _id);
 
 				if (_result == null)
 					return Bad("This ID doesn't exists.", HttpStatusCode.NotFound);
@@ -137,7 +140,7 @@ namespace KnowledgeGraph.Controllers
 					foreach (var _link in _result.Connections)
 					{
 						session.Load<Topic>("topics/" + _link)
-							.IfNotNull(x => x.Connections.Remove(id));
+							.IfNotNull(x => x.Connections.Remove(_id));
 					}
 				}
 
@@ -149,15 +152,17 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		[HttpPost]
-		public HttpResponseMessage Titles(int id, int[] arrayId)
+		public HttpResponseMessage GetTitles(JObject data)
 		{
-			if (id <= 0 && arrayId.Length != 0)
-				return Bad("ID should be more than 0");
+			int[] _arrayId = data.As<int[]>("arrayId");
+
+			if (_arrayId.Length == 0)
+				return Bad("Length should be more than 0");
 
 			return Open(session =>
 			{
 				var _result = new List<Object>();
-				foreach (var _topicId in arrayId)
+				foreach (var _topicId in _arrayId)
 				{
 					var _topic = session.Load<Topic>("topics/" + _topicId);
 					_result.Add(new
@@ -173,19 +178,21 @@ namespace KnowledgeGraph.Controllers
 
 		#region Connections
 		[HttpPost]
-		public HttpResponseMessage DeleteConnections(int id, dynamic data)
+		public HttpResponseMessage DeleteConnections(JObject data)
 		{
-			int _conId = data.conId;
-			if (id <= 0 || _conId <= 0)
+			var _id = data.As<int>("id");
+			int _conId = data.As<int>("conId");
+
+			if (_id <= 0 || _conId <= 0)
 				return Bad("ID and ConID should be more than 0");
 
 			return Open(session =>
 			{
-				var _firstTopic = session.Load<Topic>("topics/" + id);
+				var _firstTopic = session.Load<Topic>("topics/" + _id);
 				_firstTopic.IfNotNull(x => x.Connections.Remove(_conId));
 
 				var _secondTopic = session.Load<Topic>("topics/" + _conId);
-				_secondTopic.IfNotNull(x => x.Connections.Remove(id));
+				_secondTopic.IfNotNull(x => x.Connections.Remove(_id));
 
 				session.SaveChanges();
 
@@ -194,19 +201,21 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		[HttpPost]
-		public HttpResponseMessage AddConnection(int id, dynamic data)
+		public HttpResponseMessage AddConnection(JObject data)
 		{
-			int _conId = data.conId;
-			if (id <= 0 || _conId <= 0)
+			var _id = data.As<int>("id");
+			var _conId = data.As<int>("conId");
+
+			if (_id <= 0 || _conId <= 0)
 				return Bad("ID and ConID should be more than 0");
 
 			return Open(s =>
 			{
-				var _firstTopic = s.Load<Topic>("topics/" + id);
+				var _firstTopic = s.Load<Topic>("topics/" + _id);
 				_firstTopic.IfNotNull(x => x.Connections.Add(_conId));
 
 				var _secondTopic = s.Load<Topic>("topics/" + _conId);
-				_secondTopic.IfNotNull(x => x.Connections.Add(id));
+				_secondTopic.IfNotNull(x => x.Connections.Add(_id));
 
 				s.SaveChanges();
 
@@ -218,17 +227,20 @@ namespace KnowledgeGraph.Controllers
 
 		#region Links
 		[HttpPost]
-		public HttpResponseMessage DeleteLink(int id, Link link)
+		public HttpResponseMessage DeleteLink(JObject data)
 		{
-			if (id <= 0 || link == null)
+			var _id = data.As<int>("id");
+			var _link = data.As<Link>("link");
+
+			if (_id <= 0 || _link == null)
 				return Bad("ID and Links should be more than 0");
 
 			return Open(session =>
 			{
-				var _firstTopic = session.Load<Topic>("topics/" + id);
+				var _firstTopic = session.Load<Topic>("topics/" + _id);
 				_firstTopic.IfNotNull(x =>
 				{
-					var _fLink = x.Links.First(l => l.Url == link.Url && l.Title == link.Title);
+					var _fLink = x.Links.First(l => l.Url == _link.Url && l.Title == _link.Title);
 					x.Links.Remove(_fLink);
 				});
 
@@ -239,20 +251,23 @@ namespace KnowledgeGraph.Controllers
 		}
 
 		[HttpPost]
-		public HttpResponseMessage AddLink(int id, Link link)
+		public HttpResponseMessage AddLink(JObject data)
 		{
-			if (id <= 0 || link == null)
+			var _id = data.As<int>("id");
+			var _link = data.As<Link>("link");
+
+			if (_id <= 0 || _link == null)
 				return Bad("ID and Links should be more than 0");
 
 			return Open(session =>
 			{
-				var _firstTopic = session.Load<Topic>("topics/" + id);
+				var _firstTopic = session.Load<Topic>("topics/" + _id);
 				_firstTopic.IfNotNull(x =>
 				{
 					if (x.Links == null)
 						x.Links = new List<Link>();
 
-					x.Links.Add(link);
+					x.Links.Add(_link);
 				});
 
 				session.SaveChanges();
@@ -263,14 +278,14 @@ namespace KnowledgeGraph.Controllers
 		#endregion Links
 
 		[HttpPost]
-		public HttpResponseMessage Search(int id, dynamic data)
+		public HttpResponseMessage Search(JObject data)
 		{
 			return Open(session =>
 			{
-				string _titleSubstring = data.search;
-				int _count = data.count;
-				int _offset = data.offset;
-				string _partial = data.partial;
+				var _titleSubstring = data.As<string>("search");
+				var _count = data.As<int>("count");
+				var _offset = data.As<int>("offset");
+				var _partial = data.As<string>("partial");
 
 				var _result = session.Query<Topic>()
 					.Search(x => x.Title, string.Format("*{0}*", _titleSubstring), escapeQueryOptions: EscapeQueryOptions.RawQuery)
@@ -278,7 +293,7 @@ namespace KnowledgeGraph.Controllers
 					.Skip(_offset)
 					.Take(_count);
 
-				return Good(CheckResult(_result, _partial));
+				return Good(_result.AsPartial(_partial));
 			});
 		}
 
@@ -286,14 +301,6 @@ namespace KnowledgeGraph.Controllers
 		private bool CheckModel(Topic topic)
 		{
 			return topic != null && !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
-		}
-
-		private List<Topic> CheckResult(IQueryable<Topic> list, string partial)
-		{
-			if (String.IsNullOrEmpty(partial))
-				return list.ToList();
-
-			return list.Select(AsProjection<Topic>(partial)).ToList();
 		}
 		#endregion Support
 	}

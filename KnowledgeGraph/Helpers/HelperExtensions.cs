@@ -6,6 +6,9 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
+using KnowledgeGraph.Models;
+using System.Linq.Expressions;
+using Newtonsoft.Json.Linq;
 
 public static class HelperExtensions
 {
@@ -48,6 +51,39 @@ public static class HelperExtensions
 		return result;
 	}
 	#endregion Dynamic
+
+	public static IEnumerable<T> AsPartial<T>(this IQueryable<T> list, string fields) where T: class
+	{
+		if (String.IsNullOrEmpty(fields))
+			return list.ToList();
+
+		return list.Select(Projections<T>(fields)).ToList();
+	}
+
+	public static Func<T, T> Projections<T>(string fields) where T : class
+	{
+		var _xParameter = Expression.Parameter(typeof(T), "o");
+		var _xNew = Expression.New(typeof(T));
+
+		var _bindings = fields
+			.Split('.')
+			.Select(o => o.Trim())
+			.Select(o =>
+			{
+				var _mi = typeof(T).GetProperty(o);
+				var _xOriginal = Expression.Property(_xParameter, _mi);
+				return Expression.Bind(_mi, _xOriginal);
+			});
+
+		var _xInit = Expression.MemberInit(_xNew, _bindings);
+		var _lambda = Expression.Lambda<Func<T, T>>(_xInit, _xParameter);
+		return _lambda.Compile();
+	}
+
+	public static T As<T>(this JObject obj, string propertyName)
+	{
+		return obj.GetValue(propertyName).ToObject<T>();
+	}
 
 	public static string ToJson(this ExpandoObject expando)
 	{

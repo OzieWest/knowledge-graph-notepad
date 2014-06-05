@@ -43,25 +43,5 @@ namespace KnowledgeGraph.Controllers
 				}
 			}
 		}
-
-		protected Func<T, T> AsProjection<T>(string fields) where T : class
-		{
-			var _xParameter = Expression.Parameter(typeof(T), "o");
-			var _xNew = Expression.New(typeof(T));
-
-			var _bindings = fields
-				.Split('.')
-				.Select(o => o.Trim())
-				.Select(o =>
-				{
-					var _mi = typeof(T).GetProperty(o);
-					var _xOriginal = Expression.Property(_xParameter, _mi);
-					return Expression.Bind(_mi, _xOriginal);
-				});
-
-			var _xInit = Expression.MemberInit(_xNew, _bindings);
-			var _lambda = Expression.Lambda<Func<T, T>>(_xInit, _xParameter);
-			return _lambda.Compile();
-		}
 	}
 }

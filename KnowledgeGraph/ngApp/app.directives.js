@@ -59,7 +59,9 @@
 						$scope.model.Status = $scope.currentStatus.text;
 					}
 
-					$scope.model.Connections.push($scope.parent.Id);
+					if ($scope.parent.Id){
+						$scope.model.Connections.push($scope.parent.Id);
+					}
 
 					if ($scope.model.Title && $scope.model.Value) {
 						return true;
@@ -70,6 +72,10 @@
 
 				$scope.addTopic = function () {
 					if (that.checkModel()) {
+
+						$scope.model.Created = new Date();
+						$scope.model.Modified = new Date();
+						
 						topicRepository.add($scope.model).then(function (res) {
 							$scope.newTopicId = res;
 

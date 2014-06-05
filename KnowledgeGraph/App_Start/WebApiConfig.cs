@@ -11,8 +11,8 @@ namespace KnowledgeGraph
 		{
 			config.Routes.MapHttpRoute(
 				name: "DefaultApi",
-				routeTemplate: "api/{controller}/{id}/{action}",
-				defaults: new { id = RouteParameter.Optional, action = "DefaultAction" }
+				routeTemplate: "api/{controller}/{action}",
+				defaults: new { }
 			);
 		}
 	}
