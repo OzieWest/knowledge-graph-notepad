@@ -21,11 +21,11 @@
 
 <div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
 
-	<div ng-show="model.Id">
+	<div ng-show="topic.Id">
 
 		<new-topic
 			ng-show="!isShowCreateBox"
-			parent="model"
+			parent="topic"
 			on-add="onAddNewTopic()">
 		</new-topic>
 
@@ -33,16 +33,16 @@
 			<div class="mBottom title">
 				<a ng-click="deleleCurrentPost()" class="postLink" title="Delete post"><i style="margin-top: 5px;" class="icon-trash"></i></a>
 				<a ng-click="switchView()" class="postLink" title="Edit post"><i style="margin-top: 5px;" class="icon-edit"></i></a>
-				{{ model.Title }}
+				{{ topic.Title }}
 			</div>
 			<div style="font-size: 17px;" class="mBottom">
-				<div ng-bind-html="model.Value"></div>
+				<div ng-bind-html="topic.Value"></div>
 			</div>
 			<hr style="margin-bottom: 5px;" />
 			<div class="mBottom">
-				<span class="muted">{{ model.Created | date:'medium' }} | </span>
-				<span class="text-warning">{{ model.Status }} | </span>
-				<span class="text-success">{{ model.Category }}</span>
+				<span class="muted">{{ topic.Created | date:'medium' }} | </span>
+				<span class="text-warning">{{ topic.Status }} | </span>
+				<span class="text-success">{{ topic.Category }}</span>
 			</div>
 		</div>
 
@@ -53,7 +53,7 @@
 		<div ng-show="isShowCreateBox">
 			<div class="row-fluid">
 				<div class="span6">
-					<input style="width: 100%" type="text" class="full-size" name="name" ng-model="newModel.Title" placeholder="Title" />
+					<input style="width: 100%" type="text" class="full-size" name="name" ng-model="newTopic.Title" placeholder="Title" />
 				</div>
 				<div class="span3">
 					<input style="width: 100%" type="text" class="full-size" name="name" ng-model="newModel.Category" placeholder="Category" />
@@ -63,7 +63,7 @@
 				</div>
 			</div>
 
-			<text-angular ng-model="newModel.Value"></text-angular>
+			<text-angular ng-model="newTopic.Value"></text-angular>
 
 			<div class="row-fluid mBottom">
 				<div class="span2 offset10">
@@ -72,7 +72,7 @@
 						Cancel</button>
 
 					<button class="btn"
-						ng-disabled="!newModel.Title || !newModel.Category || !newModel.Value || !currentStatus.text"
+						ng-disabled="!newTopic.Title || !newTopic.Category || !newTopic.Value || !currentStatus.text"
 						ng-click="saveTopic()">
 						Save</button>
 				</div>
@@ -81,95 +81,12 @@
 		</div>
 
 		<div style="margin-bottom: 30px;">
-			<div class="mBottom title">
-				Links 
-			</div>
-			<div ng-show="!model.Links.length" class="mBottom">
-				<span class="label label-info">No links</span>
-			</div>
-
-			<div style="margin-bottom: 5px;">
-				<a style="text-decoration: none; cursor: pointer;" class="text-success" ng-click="switchLinkView()">Add new link...</a>
-			</div>
-			<div class="row-fluid mBottom" ng-show="isAddNewLink">
-				<div class="span2">
-					<link-types model="linkType"></link-types>
-				</div>
-				<div class="span6">
-					<input type="text" style="width: 100%;" placeholder="Title" ng-model="newLink.Title" />
-				</div>
-				<div class="span3">
-					<input type="text" style="width: 100%;" placeholder="Url" ng-model="newLink.Url" />
-				</div>
-				<div class="span1">
-					<a class="btn" ng-click="addNewLink()"><i class="icon-plus-sign"></i> Add</a>
-				</div>
-			</div>
-			<table class="table table-bordered table-striped" ng-show="model.Links.length">
-				<tr>
-					<th style="width: 50px;">#</th>
-					<th>Type</th>
-					<th>Title</th>
-					<th style="width: 50px;"></th>
-				</tr>
-				<tr ng-repeat="link in model.Links track by $index">
-					<td>{{ $index + 1 }}</td>
-					<td style="width: 100px;">
-						{{ link.Type }}
-					</td>
-					<td>
-						<a href="{{ link.Url }}" target="_blank">{{ link.Title }}</a>
-					</td>
-					<td>
-						<button class="btn" title="Delete link" ng-click="deleteLink(link)">
-							<i class="icon-trash"></i>
-						</button>
-					</td>
-				</tr>
-			</table>
+			<link-list topic="topic"/>
 		</div>
 
-		<div style="margin-bottom: 10px;">
-			<div class="mBottom title">
-				Connections
-			</div>
-
-			<div style="margin-bottom: 5px;">
-				<a style="text-decoration: none; cursor: pointer;" class="text-success" ng-click="newConnection.switchView()">Add new connections...</a>
-			</div>
-			<div class="row-fluid mBottom" ng-show="newConnection.isShow">
-				<div class="span11">
-					<search-by-title model="newConnection.search">
-					</search-by-title>
-				</div>
-				<div class="span1">
-					<a class="btn" ng-click="newConnection.add()"><i class="icon-plus-sign"></i></a>
-				</div>
-			</div>
-
-			<table class="table table-bordered table-striped" ng-show="connections.data.length">
-				<tr>
-					<th style="width: 50px;">#</th>
-					<th>Title</th>
-					<th style="width: 50px;"></th>
-				</tr>
-				<tr ng-repeat="con in connections.data track by $index ">
-					<td>{{ $index + 1 }}</td>
-					<td>
-						<a href="topic?id={{ con.Id }}">{{ con.Title }}</a>
-					</td>
-					<td>
-						<button class="btn" title="Delete connection" ng-click="connections.del(con.Id)">
-							<i class="icon-trash"></i>
-						</button>
-					</td>
-				</tr>
-			</table>
-			<div ng-show="!connections.data.length">
-				<span class="label label-info">No connections</span>
-			</div>
+		<div style="margin-bottom: 30px;">
+			<connection-list topic="topic" />
 		</div>
-
 	</div>
 </div>
 
@@ -185,182 +102,70 @@
 
 			app.controller('ctrl.page-view-topic', ['$scope', 'topicRepository',
 				function($scope, repo) {
-					var ctrl = this;
-
 					$scope.currentStatus = { id: 0, text: 'Ожидает' };
 
 					// Topics ====================================================
-					$scope.model = {};
-					$scope.newModel = {};
+					$scope.topic = {};
+					$scope.newTopic = {};
 					$scope.isShowCreateBox = false;
 
 					$scope.deleleCurrentPost = function() {
-						repo.del($scope.model.Id).then(function() {
+						repo.topics.del($scope.topic.Id).then(function() {
 							window.location = "/";
-						}, ctrl.onError);
+						}, onError);
 					};
 
 					$scope.switchView = function() {
 						$scope.isShowCreateBox = !$scope.isShowCreateBox;
 
 						if ($scope.isShowCreateBox) {
-							$scope.newModel.Title = $scope.model.Title;
-							$scope.newModel.Value = $scope.model.Value;
-							$scope.newModel.Category = $scope.model.Category;
+							$scope.newTopic.Title = $scope.topic.Title;
+							$scope.newTopic.Value = $scope.topic.Value;
+							$scope.newTopic.Category = $scope.topic.Category;
 
-							$scope.currentStatus.text = $scope.model.Status;
+							$scope.currentStatus.text = $scope.topic.Status;
 						}
 					};
 
 					$scope.onAddNewTopic = function() {
-						repo.update(id, $scope.model).then(function() {
-							$scope.connections.load($scope.model.Connections);
-						}, ctrl.onError);
+						repo.topics.update(id, $scope.topic).then(function() {
+							$scope.connections.load($scope.topic.Connections);
+						}, onError);
 					};
 
 					$scope.saveTopic = function() {
-						$scope.newModel.Links = $scope.model.Links;
-						$scope.newModel.Connections = $scope.model.Connections;
+						$scope.newTopic.Links = $scope.topic.Links;
+						$scope.newTopic.Connections = $scope.topic.Connections;
 
-						$scope.newModel.Status = $scope.currentStatus.text;
+						$scope.newTopic.Status = $scope.currentStatus.text;
 
-						repo.update($scope.model.Id, $scope.newModel).then(function(status) {
+						repo.topics.update($scope.topic.Id, $scope.newTopic).then(function(status) {
 							if (status) {
 
-								$scope.model.Category = $scope.newModel.Category;
-								$scope.model.Status = $scope.newModel.Status;
+								$scope.topic.Category = $scope.newTopic.Category;
+								$scope.topic.Status = $scope.newTopic.Status;
 
-								$scope.model.Value = $scope.newModel.Value;
-								$scope.model.Title = $scope.newModel.Title;
-								$scope.model.Links = $scope.newModel.Links;
-								$scope.model.Connections = $scope.newModel.Connections;
+								$scope.topic.Value = $scope.newTopic.Value;
+								$scope.topic.Title = $scope.newTopic.Title;
+								$scope.topic.Links = $scope.newTopic.Links;
+								$scope.topic.Connections = $scope.newTopic.Connections;
 
 								$scope.isShowCreateBox = false;
 
 								show.success('Topic updated!', 'Success');
 							} else {
-								ctrl.onError();
+								onError();
 							}
-						}, ctrl.onError);
+						}, onError);
 					};
 
-
-					// Connections ====================================================
-					$scope.connections = {
-						data: [],
-						del: function(conId) {
-							var obj = this;
-							repo.connections.del($scope.model.Id, conId).then(function(res) {
-								if (res) {
-									var ind = _.map(obj.data, function(e) {
-										return e.val;
-									}).indexOf(conId);
-
-									obj.data.splice(ind, 1);
-
-									var conIDs = $scope.model.Connections;
-									conIDs.splice(conIDs.indexOf(conId), 1);
-
-									show.success('Connection broke!', 'Success');
-								}
-							}, ctrl.onError);
-						},
-						load: function(value) {
-							var obj = this;
-							repo.titles(id, value).then(function(res) {
-								obj.data = ng.copy(res);
-							}, ctrl.onError);
-						}
-					};
-
-					$scope.newConnection = {
-						search: {},
-						clear: function() {
-							this.search = { id: -1, text: 'None' };
-						},
-						add: function() {
-							var that = this;
-							if (that.search.id != -1) {
-								repo.connections.add($scope.model.Id, that.search.id).then(function(res) {
-									$scope.connections.data.push({ Id: that.search.id, Title: that.search.text });
-									that.clear();
-								}, that.onError);
-							}
-						},
-						isShow: false,
-						switchView: function() {
-							this.isShow = !this.isShow;
-						}
-					};
-					$scope.newConnection.clear();
-
-
-					// Links ====================================================
-					$scope.newLink = {};
-					$scope.linkType = {};
-					$scope.isAddNewLink = false;
-
-					$scope.deleteLink = function(link) {
-						repo.deleteLink($scope.model.Id, link).then(function(res) {
-							if (res) {
-								var ind = _.map($scope.model.Links, function(e) {
-									return e.Url;
-								}).indexOf(link.Url);
-
-								$scope.model.Links.splice(ind, 1);
-								show.success('Link deleted!', 'Success');
-							}
-						}, ctrl.onError);
-					};
-
-					$scope.switchLinkView = function() {
-						$scope.isAddNewLink = !$scope.isAddNewLink;
-					};
-
-					$scope.addNewLink = function () {
-						$scope.newLink.Type = $scope.linkType.text;
-						repo.addLink($scope.model.Id, $scope.newLink).then(function(res) {
-							if (res) {
-								if (!$scope.model.Links) {
-									$scope.model.Links = [];
-								}
-								$scope.model.Links.push($scope.newLink);
-								$scope.switchLinkView();
-								ctrl.clearLink();
-								show.success('Link added!', 'Success');
-							}
-						}, ctrl.onError);
-					};
-
-					ctrl.clearLink = function() {
-						$scope.newLink = {
-							Title: '',
-							Type: 'Статья',
-							Url: ''
-						};
-					};
-
-
-					// Support ====================================================
-					ctrl.onError = function(msg) {
-						console.log('Error', msg);
-						show.error(msg.Message, 'Error');
-					};
 
 					// INIT ====================================================
-					(function init() {
-						ctrl.clearLink();
-						repo.getById(id).then(function(result) {
-							$scope.model = result;
-							if (!$scope.model.Connections) {
-								$scope.model.Connections = [];
-							}
-							if ($scope.model.Connections.length) {
-								$scope.connections.load($scope.model.Connections);
-							}
-
-							document.title = $scope.model.Title + ' ' + document.title;
-						}, ctrl.onError);
+					(function() {
+						repo.topics.getById(id).then(function(result) {
+							$scope.topic = ng.copy(result);
+							document.title = $scope.topic.Title + ' ' + document.title;
+						}, onError);
 					})();
 
 				}]);

@@ -76,6 +76,13 @@
 		<div id="footer"></div>
 
 	</div>
+	
+	<script>
+		var onError = function (msg) {
+			console.log('Error', msg);
+			toastr.error(msg.Message, 'Error');
+		};
+	</script>
 
 	@RenderSection("scripts", required: false)
 </body>

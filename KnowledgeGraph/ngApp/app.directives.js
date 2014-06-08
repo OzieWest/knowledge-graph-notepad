@@ -12,7 +12,9 @@
 			},
 			templateUrl: '../templates/tmpl.directive.new-topic.html?1',
 			controller: function ($scope, topicRepository) {
+				var repo = topicRepository;
 				var that = this;
+				
 				//$scope.currentCategory = { id: 0, text: 'Общее' };
 				$scope.currentStatus = { id: 0, text: 'Ожидает' };
 
@@ -76,7 +78,7 @@
 						$scope.model.Created = new Date();
 						$scope.model.Modified = new Date();
 						
-						topicRepository.add($scope.model).then(function (res) {
+						repo.topics.add($scope.model).then(function (res) {
 							$scope.newTopicId = res;
 
 							that.updateParentLink();
@@ -193,9 +195,10 @@
 			template: '<input type="text" ui-select2="options" ng-model="model">',
 			controller: function ($scope, topicRepository) {
 				var that = this;
+				var repo = topicRepository;
 
 				var search = _.debounce(function (query) {
-					topicRepository.search(query.term, 10, 0, 'Id.Title').then(function(result) {
+					repo.topics.search(query.term, 10, 0, 'Id.Title').then(function(result) {
 						var data = {};
 						data.results = _.map(result, function(e) {
 							return {
@@ -217,6 +220,147 @@
 					initSelection: function (element, callback) {
 					}
 				};
+			}
+		};
+	});
+	
+	app.directive('linkList', function () {
+		return {
+			replace: true,
+			restrict: 'E',
+			scope: {
+				topic: "=",
+			},
+			templateUrl: '../templates/tmpl.directive.links.html?1',
+			controller: function ($scope, topicRepository) {
+				var repo = topicRepository;
+				var ctrl = this;
+
+				$scope.linkType = {};
+				$scope.model = {};
+				$scope.isAdd = false;
+
+				$scope.switchView = function() {
+					$scope.isAdd = !$scope.isAdd;
+				};
+
+				$scope.clear = function() {
+					$scope.model = {
+						Title: '',
+						Type: 'Статья',
+						Url: ''
+					};
+				};
+
+				$scope.add = function() {
+					$scope.model.Type = $scope.linkType.text;
+					repo.links.add($scope.topic.Id, $scope.model).then(function(res) {
+						if (res) {
+							if (!$scope.topic.Links) {
+								$scope.topic.Links = [];
+							}
+							$scope.topic.Links.push($scope.model);
+
+							$scope.switchView();
+							$scope.clear();
+
+							show.success('Link added!', 'Success');
+						}
+					}, ctrl.onError);
+				};
+
+				$scope.del = function (link) {
+					repo.links.del($scope.topic.Id, link).then(function (res) {
+						if (res) {
+							var ind = _.map($scope.topic.Links, function (e) {
+								return e.Url;
+							}).indexOf(link.Url);
+
+							$scope.topic.Links.splice(ind, 1);
+							show.success('Link deleted!', 'Success');
+						}
+					}, ctrl.onError);
+				};
+				
+				$scope.clear();
+			}
+		};
+	});
+	
+	app.directive('connectionList', function () {
+		return {
+			replace: true,
+			restrict: 'E',
+			scope: {
+				topic: "=",
+			},
+			templateUrl: '../templates/tmpl.directive.connections.html?1',
+			controller: function ($scope, topicRepository) {
+				var repo = topicRepository;
+				var ctrl = this;
+
+				$scope.connections = {
+					data: [],
+					del: function (conId) {
+						var obj = this;
+						repo.connections.del($scope.topic.Id, conId).then(function (res) {
+							if (res) {
+								var ind = _.map(obj.data, function (e) {
+									return e.val;
+								}).indexOf(conId);
+
+								obj.data.splice(ind, 1);
+
+								var conIDs = $scope.topic.Connections;
+								conIDs.splice(conIDs.indexOf(conId), 1);
+
+								show.success('Connection broke!', 'Success');
+							}
+						}, onError);
+					},
+					load: function (value) {
+						var obj = this;
+						repo.topics.titles($scope.topic.Id, value).then(function (res) {
+							obj.data = ng.copy(res);
+						}, onError);
+					}
+				};
+
+				$scope.newConnection = {
+					search: {},
+					clear: function () {
+						this.search = { id: -1, text: 'None' };
+					},
+					add: function () {
+						var that = this;
+						if (that.search.id != -1) {
+							repo.connections.add($scope.topic.Id, that.search.id).then(function (res) {
+								$scope.connections.data.push({ Id: that.search.id, Title: that.search.text });
+								that.clear();
+							}, onError);
+						}
+					},
+					isShow: false,
+					switchView: function () {
+						this.isShow = !this.isShow;
+					}
+				};
+				
+				// INIT -------------------------------------------------------------------
+				$scope.newConnection.clear();
+				var wasLoaded = false;
+
+				$scope.$watch('topic.Id', function (newValue, oldValue) {
+					if (newValue && !wasLoaded) {
+						if (!$scope.topic.Connections) {
+							$scope.topic.Connections = [];
+						}
+						if ($scope.topic.Connections.length){
+							$scope.connections.load($scope.topic.Connections);
+						}
+						wasLoaded = true;
+					}
+				});
 			}
 		};
 	});

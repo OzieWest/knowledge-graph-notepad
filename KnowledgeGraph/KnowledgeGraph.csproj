@@ -246,6 +246,8 @@
     <Content Include="Scripts\ui-select2.js" />
     <Content Include="Scripts\underscore-min.js" />
     <Content Include="Scripts\underscore.js" />
+    <Content Include="templates\tmpl.directive.connections.html" />
+    <Content Include="templates\tmpl.directive.links.html" />
     <Content Include="templates\tmpl.directive.new-topic.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

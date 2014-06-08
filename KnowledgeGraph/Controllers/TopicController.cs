@@ -176,6 +176,27 @@ namespace KnowledgeGraph.Controllers
 			});
 		}
 
+		[HttpPost]
+		public HttpResponseMessage Search(JObject data)
+		{
+			return Open(session =>
+			{
+				var _titleSubstring = data.As<string>("search");
+				var _count = data.As<int>("count");
+				var _offset = data.As<int>("offset");
+				var _partial = data.As<string>("partial");
+
+				var _result = session.Query<Topic>()
+					.Search(x => x.Title, string.Format("*{0}*", _titleSubstring), escapeQueryOptions: EscapeQueryOptions.RawQuery)
+					.OrderByDescending(x => x.Created)
+					.Skip(_offset)
+					.Take(_count);
+
+				return Good(_result.AsPartial(_partial));
+			});
+		}
+
+
 		#region Connections
 		[HttpPost]
 		public HttpResponseMessage DeleteConnections(JObject data)
@@ -277,25 +298,6 @@ namespace KnowledgeGraph.Controllers
 		}
 		#endregion Links
 
-		[HttpPost]
-		public HttpResponseMessage Search(JObject data)
-		{
-			return Open(session =>
-			{
-				var _titleSubstring = data.As<string>("search");
-				var _count = data.As<int>("count");
-				var _offset = data.As<int>("offset");
-				var _partial = data.As<string>("partial");
-
-				var _result = session.Query<Topic>()
-					.Search(x => x.Title, string.Format("*{0}*", _titleSubstring), escapeQueryOptions: EscapeQueryOptions.RawQuery)
-					.OrderByDescending(x => x.Created)
-					.Skip(_offset)
-					.Take(_count);
-
-				return Good(_result.AsPartial(_partial));
-			});
-		}
 
 		#region Support
 		private bool CheckModel(Topic topic)
@@ -303,20 +305,5 @@ namespace KnowledgeGraph.Controllers
 			return topic != null && !String.IsNullOrEmpty(topic.Title) && !String.IsNullOrEmpty(topic.Value);
 		}
 		#endregion Support
-	}
-
-	public class TitleResponse
-	{
-		public int Id;
-		public string Title;
-	}
-
-	public static class Ext
-	{
-		public static void IfNotNull<T>(this T obj, Action<T> action) where T : class
-		{
-			if (obj != null)
-				action(obj);
-		}
 	}
 }

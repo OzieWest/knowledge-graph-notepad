@@ -110,4 +110,10 @@ public static class HelperExtensions
 
 		return json.ToString();
 	}
+
+	public static void IfNotNull<T>(this T obj, Action<T> action) where T : class
+	{
+		if (obj != null)
+			action(obj);
+	}
 }

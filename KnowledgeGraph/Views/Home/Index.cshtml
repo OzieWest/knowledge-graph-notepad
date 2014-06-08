@@ -112,7 +112,7 @@
 						onAdd: function() {
 							var that = this;
 							var id = that.data.Connections[0];
-							repo.getById(id).then(function(res) {
+							repo.topics.getById(id).then(function(res) {
 								$scope.topics.data.splice(0, 0, res);
 								that.clear();
 							}, ctrl.onError);
@@ -126,7 +126,7 @@
 						data: [],
 						del: function(id) {
 							var that = this;
-							repo.del(id).then(function() {
+							repo.topics.del(id).then(function() {
 								var ind = _.map(that.data, function(e) {
 									return e.Id;
 								}).indexOf(id);
@@ -143,7 +143,7 @@
 						var fields = $scope.config.fields;
 						var category = $scope.config.category;
 
-						return repo.getAll(count, offset, category, fields).then(function(r) {
+						return repo.topics.getAll(count, offset, category, fields).then(function(r) {
 							$scope.topics.data = ng.copy(r.data);
 							$scope.topics.all = r.all;
 						}, ctrl.onError);

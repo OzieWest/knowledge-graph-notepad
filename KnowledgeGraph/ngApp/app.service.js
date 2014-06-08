@@ -34,7 +34,7 @@
 			return deferred.promise;
 		};
 
-		return {
+		var topics = {
 			getAll: function (count, offset, category, partial) {
 				return call("get", "topic/GetAll?count=" + count + "&offset=" + offset + "&partial=" + partial + "&category=" + category);
 			},
@@ -62,20 +62,30 @@
 			titles: function (id, arrayId) {
 				return call("post", "topic/GetTitles", { arrayId: arrayId });
 			},
-			connections: {
-				del: function (id, conId) {
-					return call("post", "topic/DeleteConnections", { id: id, conId: conId });
-				},
-				add: function (id, conId) {
-					return call("post", "topic/AddConnection", { id: id, conId: conId });
-				}
-			},
-			deleteLink: function (id, link) {
-				return call("post", "topic/DeleteLink", { id: id, link: link });
-			},
-			addLink: function (id, link) {
+		};
+
+		var links = {
+			add: function (id, link) {
 				return call("post", "topic/AddLink", { id: id, link: link });
 			},
+			del: function (id, link) {
+				return call("post", "topic/DeleteLink", { id: id, link: link });
+			}
+		};
+
+		var connections = {
+			add: function (id, conId) {
+				return call("post", "topic/AddConnection", { id: id, conId: conId });
+			},
+			del: function (id, conId) {
+				return call("post", "topic/DeleteConnections", { id: id, conId: conId });
+			}
+		};
+
+		return {
+			topics: topics,
+			links: links,
+			connections: connections
 		};
 	});
 
