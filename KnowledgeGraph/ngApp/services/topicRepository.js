@@ -1,8 +1,9 @@
-﻿(function (ng, show) {
+﻿(function (ng) {
 	'use strict';
-	var app = ng.module('app.service', []);
 
-	app.factory('topicRepository', function ($q, $http, $log) {
+	var name = 'topicRepository';
+	var app = ng.module(name, []);
+	app.factory(name, function ($q, $http, $log) {
 		var ROOT = "http://localhost:55528/api/";
 		
 		var call = function (method, params, data) {
@@ -89,4 +90,4 @@
 		};
 	});
 
-})(angular, toastr);
+})(angular);

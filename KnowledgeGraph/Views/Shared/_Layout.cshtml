@@ -8,9 +8,9 @@
 
 	<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
 	<link href="~/Content/bootstrap-responsive.min.css" rel="stylesheet" />
-	<link href="~/Content/toastr.min.css" rel="stylesheet" />
 	<link href="~/Content/select2.css" rel="stylesheet" />
 	<link href="~/Content/loading-bar.css" rel="stylesheet" />
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/css/toastr.min.css" rel="stylesheet" />
 	<link href="~/Content/Site.css" rel="stylesheet" />
 
 	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
@@ -33,40 +33,44 @@
 		.mLeft10 {
 			margin-left: 10px;
 		}
+
+		.mainTitle {
+			margin: 20px 0px;
+			font-size: 30px;
+			font-family: monospace;
+		}
 	</style>
 	@RenderSection("header", required: false)
-	
-	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-	<script src="~/Scripts/underscore.js"></script>
-	<script src="~/Scripts/toastr.min.js"></script>
-	<script src="~/Scripts/select2.min.js"></script>
 
-	<script src="~/Scripts/angular.min.js"></script>
-	<script src="~/Scripts/angular-sanitize.min.js"></script>
-	<script src="https://code.angularjs.org/1.2.16/angular-animate.min.js"></script>
-	<script src="~/Scripts/ui-select2.js"></script>
-	<script src="~/Scripts/textAngular.min.js"></script>
-	<script src="~/Scripts/loading-bar.js"></script>
-	<script src="~/ngApp/app.service.js"></script>
-	<script src="~/ngApp/app.directives.js"></script>
+	<!-- JQuery 2.11 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="~/Scripts/angular/select2.min.js"></script>
+
+	<!-- Underscore 1.60 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+
+	<!-- RxJs 2.2.24 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/rxjs/2.2.24/rx.all.min.js"></script>
+
+	<!-- Toastr 2.0.2 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js"></script>
+
+	<!-- AngularJS 1.2.16 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-sanitize.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-loader.min.js"></script>
+	<script src="~/Scripts/angular/textAngular.min.js"></script>
+	<script src="~/Scripts/angular/ui-select2.js"></script>
+	<script src="~/Scripts/angular/loading-bar.js"></script>
 	
-	<script>
-		angular.module('package.main', [
-			'app.service',
-			'app.directive',
-			'ngSanitize',
-			'ui.select2',
-			'angular-loading-bar',
-			'ngAnimate'
-		]);
-	</script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+	<script src="~/ngApp/require-config.js"></script>
 </head>
 <body>
 
 	<div class="container">
 
 		<div id="header">
-			
 		</div>
 
 		<div id="main">
@@ -76,7 +80,7 @@
 		<div id="footer"></div>
 
 	</div>
-	
+
 	<script>
 		var onError = function (msg) {
 			console.log('Error', msg);

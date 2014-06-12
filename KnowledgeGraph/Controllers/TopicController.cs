@@ -22,10 +22,10 @@ namespace KnowledgeGraph.Controllers
 		{
 			return Open(session =>
 			{
-				IQueryable<Topic> _data = null;
+				IQueryable<Topic> _data;
 
 				var _query = session.Query<Topic>();
-				var _allCount = 0;
+				int _allCount;
 				
 				if (!String.IsNullOrEmpty(category))
 				{
@@ -64,10 +64,7 @@ namespace KnowledgeGraph.Controllers
 			{
 				var _result = session.Load<Topic>("topics/" + id);
 
-				if (_result != null)
-					return Good(_result);
-
-				return Bad("This ID doesn't exists.", HttpStatusCode.NotFound);
+				return _result != null ? Good(_result) : Bad("This ID doesn't exists.", HttpStatusCode.NotFound);
 			});
 		}
 
@@ -123,7 +120,7 @@ namespace KnowledgeGraph.Controllers
 		[HttpPost]
 		public HttpResponseMessage DeleteTopic(JObject data)
 		{
-			int _id = data.As<int>("id");;
+			var _id = data.As<int>("id");;
 
 			if (_id <= 0)
 				return Bad("Id should be more than 0");
@@ -154,7 +151,7 @@ namespace KnowledgeGraph.Controllers
 		[HttpPost]
 		public HttpResponseMessage GetTitles(JObject data)
 		{
-			int[] _arrayId = data.As<int[]>("arrayId");
+			var _arrayId = data.As<int[]>("arrayId");
 
 			if (_arrayId.Length == 0)
 				return Bad("Length should be more than 0");
@@ -162,13 +159,12 @@ namespace KnowledgeGraph.Controllers
 			return Open(session =>
 			{
 				var _result = new List<Object>();
-				foreach (var _topicId in _arrayId)
+				foreach (var _topic in _arrayId.Select(id => session.Load<Topic>("topics/" + id)))
 				{
-					var _topic = session.Load<Topic>("topics/" + _topicId);
 					_result.Add(new
 					{
-						Id = _topic.Id,
-						Title = _topic.Title
+						_topic.Id,
+						_topic.Title
 					});
 				}
 
@@ -202,7 +198,7 @@ namespace KnowledgeGraph.Controllers
 		public HttpResponseMessage DeleteConnections(JObject data)
 		{
 			var _id = data.As<int>("id");
-			int _conId = data.As<int>("conId");
+			var _conId = data.As<int>("conId");
 
 			if (_id <= 0 || _conId <= 0)
 				return Bad("ID and ConID should be more than 0");

@@ -205,7 +205,19 @@
     <Content Include="Content\bootstrap-responsive.min.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\loading-bar.css" />
-    <Content Include="Scripts\loading-bar.js" />
+    <Content Include="ngApp\controllers\page-index.js" />
+    <Content Include="ngApp\controllers\page.topic.js" />
+    <Content Include="ngApp\core.js" />
+    <Content Include="ngApp\directives\app.directives.min.js">
+      <DependentUpon>newTopic.js</DependentUpon>
+    </Content>
+    <Content Include="ngApp\directives\connection-list.js" />
+    <Content Include="ngApp\directives\link-list.js" />
+    <Content Include="ngApp\directives\link-types.js" />
+    <Content Include="ngApp\directives\search-by-title.js" />
+    <Content Include="ngApp\directives\status-types.js" />
+    <Content Include="ngApp\require-config.js" />
+    <Content Include="Scripts\angular\loading-bar.js" />
     <Content Include="Content\select2-spinner.gif" />
     <Content Include="Content\select2.css" />
     <Content Include="Content\select2.png" />
@@ -214,17 +226,13 @@
     <Content Include="Content\toastr.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="ngApp\app.directives.js" />
-    <Content Include="ngApp\app.service.js" />
-    <Content Include="Scripts\angular-mocks.js" />
-    <Content Include="Scripts\angular-route.min.js" />
-    <Content Include="Scripts\angular-sanitize.min.js" />
-    <Content Include="Scripts\angular.min.js" />
+    <Content Include="ngApp\directives\newTopic.js" />
+    <Content Include="ngApp\services\topicRepository.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\errors.json" />
-    <Content Include="Scripts\angular-sanitize.min.js.map" />
-    <Content Include="Scripts\angular-route.min.js.map" />
-    <Content Include="Scripts\angular.min.js.map" />
+    <Content Include="ngApp\directives\app.directives.min.js.map">
+      <DependentUpon>newTopic.js</DependentUpon>
+    </Content>
     <None Include="Scripts\jquery-1.8.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.8.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -239,16 +247,13 @@
     <Content Include="Scripts\knockout-2.2.0.debug.js" />
     <Content Include="Scripts\knockout-2.2.0.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\select2.min.js" />
-    <Content Include="Scripts\textAngular-sanitize.min.js" />
-    <Content Include="Scripts\textAngular.min.js" />
-    <Content Include="Scripts\toastr.min.js" />
-    <Content Include="Scripts\ui-select2.js" />
-    <Content Include="Scripts\underscore-min.js" />
-    <Content Include="Scripts\underscore.js" />
-    <Content Include="templates\tmpl.directive.connections.html" />
-    <Content Include="templates\tmpl.directive.links.html" />
-    <Content Include="templates\tmpl.directive.new-topic.html" />
+    <Content Include="Scripts\angular\select2.min.js" />
+    <Content Include="Scripts\angular\textAngular-sanitize.min.js" />
+    <Content Include="Scripts\angular\textAngular.min.js" />
+    <Content Include="Scripts\angular\ui-select2.js" />
+    <Content Include="ngApp\views\directive.connections.html" />
+    <Content Include="ngApp\views\directive.links.html" />
+    <Content Include="ngApp\views\directive.new-topic.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -275,9 +280,7 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
-    <Content Include="Scripts\underscore-min.map" />
     <Content Include="Scripts\version.json" />
-    <Content Include="Scripts\toastr.min.js.map" />
     <Content Include="Views\Home\Topic.cshtml" />
   </ItemGroup>
   <ItemGroup>

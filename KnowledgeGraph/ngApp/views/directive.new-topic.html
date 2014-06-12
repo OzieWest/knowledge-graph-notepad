@@ -1,0 +1,35 @@
+﻿<div class="row-fluid">
+	<div style="margin-bottom: 5px;">
+		<a href
+			style="text-decoration: none;"
+			ng-click="switchView.Topic()">Add new topic...</a>
+	</div>
+
+	<div ng-show="isView.NewTopic">
+		<div class="row-fluid">
+			<div class="span6">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Title" placeholder="Title" />
+			</div>
+			<div class="span3">
+				<input style="width: 100%" type="text" class="full-size" name="name" ng-model="model.Category" placeholder="Category" />
+			</div>
+			<div class="span3">
+				<status-types model="currentStatus"></status-types>
+			</div>
+		</div>
+
+		<text-angular ng-model="model.Value"></text-angular>
+		
+		<link-list topic="model"></link-list>
+
+		<div class="row-fluid mBottom">
+			<div class="span1">
+				<button class="btn"
+					ng-disabled="!model.Title || !model.Value || !model.Category"
+					ng-click="addTopic()">
+					Submit</button>
+			</div>
+		</div>
+		<hr />
+	</div>
+</div>

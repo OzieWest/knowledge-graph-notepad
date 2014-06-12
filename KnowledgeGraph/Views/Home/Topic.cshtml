@@ -19,7 +19,9 @@
 	</style>
 }
 
-<div ng-app="app.page-view-topic" ng-controller="ctrl.page-view-topic" ng-cloak class="ng-cloak">
+<div ng-controller="page.topic" ng-cloak class="ng-cloak">
+	
+	<div class="mainTitle"><a href="../">GraphPad</a></div>
 
 	<div ng-show="topic.Id">
 
@@ -68,12 +70,12 @@
 			<div class="row-fluid mBottom">
 				<div class="span2 offset10">
 					<button class="btn"
-						ng-click="switchView()">
+					        ng-click="switchView()">
 						Cancel</button>
 
 					<button class="btn"
-						ng-disabled="!newTopic.Title || !newTopic.Category || !newTopic.Value || !currentStatus.text"
-						ng-click="saveTopic()">
+					        ng-disabled="!newTopic.Title || !newTopic.Category || !newTopic.Value || !currentStatus.text"
+					        ng-click="saveTopic()">
 						Save</button>
 				</div>
 			</div>
@@ -93,82 +95,12 @@
 @section scripts
 {
 	<script>
-		(function(ng, show) {
-			'use strict';
+		var id = '@Html.Raw(ViewBag.Id)';
 
-			var id = '@Html.Raw(ViewBag.Id)';
+		require(['all', 'ctrl/page.topic'], function () {
+			console.info('Loading complete!');
 
-			var app = ng.module('app.page-view-topic', ['package.main']);
-
-			app.controller('ctrl.page-view-topic', ['$scope', 'topicRepository',
-				function($scope, repo) {
-					$scope.currentStatus = { id: 0, text: 'Ожидает' };
-
-					// Topics ====================================================
-					$scope.topic = {};
-					$scope.newTopic = {};
-					$scope.isShowCreateBox = false;
-
-					$scope.deleleCurrentPost = function() {
-						repo.topics.del($scope.topic.Id).then(function() {
-							window.location = "/";
-						}, onError);
-					};
-
-					$scope.switchView = function() {
-						$scope.isShowCreateBox = !$scope.isShowCreateBox;
-
-						if ($scope.isShowCreateBox) {
-							$scope.newTopic.Title = $scope.topic.Title;
-							$scope.newTopic.Value = $scope.topic.Value;
-							$scope.newTopic.Category = $scope.topic.Category;
-
-							$scope.currentStatus.text = $scope.topic.Status;
-						}
-					};
-
-					$scope.onAddNewTopic = function() {
-						repo.topics.update(id, $scope.topic).then(function() {
-							$scope.connections.load($scope.topic.Connections);
-						}, onError);
-					};
-
-					$scope.saveTopic = function() {
-						$scope.newTopic.Links = $scope.topic.Links;
-						$scope.newTopic.Connections = $scope.topic.Connections;
-
-						$scope.newTopic.Status = $scope.currentStatus.text;
-
-						repo.topics.update($scope.topic.Id, $scope.newTopic).then(function(status) {
-							if (status) {
-
-								$scope.topic.Category = $scope.newTopic.Category;
-								$scope.topic.Status = $scope.newTopic.Status;
-
-								$scope.topic.Value = $scope.newTopic.Value;
-								$scope.topic.Title = $scope.newTopic.Title;
-								$scope.topic.Links = $scope.newTopic.Links;
-								$scope.topic.Connections = $scope.newTopic.Connections;
-
-								$scope.isShowCreateBox = false;
-
-								show.success('Topic updated!', 'Success');
-							} else {
-								onError();
-							}
-						}, onError);
-					};
-
-
-					// INIT ====================================================
-					(function() {
-						repo.topics.getById(id).then(function(result) {
-							$scope.topic = ng.copy(result);
-							document.title = $scope.topic.Title + ' ' + document.title;
-						}, onError);
-					})();
-
-				}]);
-		}(angular, toastr));
+			angular.bootstrap(document, ['page.topic']);
+		});
 	</script>
 }

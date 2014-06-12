@@ -13,23 +13,16 @@
 			width: 100%;
 		}
 
-		.mainTitle {
-			margin: 20px 0px;
-			font-size: 30px;
-			font-family: monospace;
-		}
+		
 
 	</style>
 }
 
-<div ng-app="app.page-index" ng-controller="ctrl.page-index" ng-cloak class="ng-cloak">
+<div ng-controller="page-index" ng-cloak class="ng-cloak">
 	
 	<div class="mainTitle"><a ng-click="toMain()">GraphPad</a></div>
 
-	<new-topic
-		parent="newTopic.data"
-		on-add="newTopic.onAdd()">
-	</new-topic>
+	<new-topic></new-topic>
 	
 	<table class="table table-bordered table-striped" ng-show="topics.data.length">
 		<tr style="font-weight: bold;">
@@ -77,104 +70,10 @@
 {
 	<script>
 
-		(function(ng, show) {
-			'use strict';
-
-			var app = ng.module('app.page-index', ['package.main']);
-
-			app.controller('ctrl.page-index', ['$scope', 'topicRepository',
-				function($scope, repo) {
-					var ctrl = this;
-					$scope.config = {
-						offset: 0,
-						count: 20,
-						fields: 'Id.Category.Status.Title.Created.Connections',
-						category: '',
-						busy: true
-					};
-
-					ctrl.onError = function(err) {
-						show.error(err.message, 'Error');
-						console.log('Error', err);
-					};
-
-
-					// -------------------------------------------------------
-					$scope.newTopic = {
-						data: {},
-						clear: function() {
-							this.data = {
-								id: 0,
-								Connections: [],
-								Category: 'Общее',
-							};
-						},
-						onAdd: function() {
-							var that = this;
-							var id = that.data.Connections[0];
-							repo.topics.getById(id).then(function(res) {
-								$scope.topics.data.splice(0, 0, res);
-								that.clear();
-							}, ctrl.onError);
-						}
-					};
-					$scope.newTopic.clear();
-
-
-					// -------------------------------------------------------
-					$scope.topics = {
-						data: [],
-						del: function(id) {
-							var that = this;
-							repo.topics.del(id).then(function() {
-								var ind = _.map(that.data, function(e) {
-									return e.Id;
-								}).indexOf(id);
-								that.data.splice(ind, 1);
-								show.success('Topic deleted!', 'Success');
-							}, ctrl.onError);
-						},
-						all: 0
-					};
-
-					var dbGetAll = function() {
-						var count = $scope.config.count;
-						var offset = $scope.config.offset;
-						var fields = $scope.config.fields;
-						var category = $scope.config.category;
-
-						return repo.topics.getAll(count, offset, category, fields).then(function(r) {
-							$scope.topics.data = ng.copy(r.data);
-							$scope.topics.all = r.all;
-						}, ctrl.onError);
-					};
-
-					$scope.toMain = function () {
-						$scope.config.offset = 0;
-						$scope.config.category = '';
-						dbGetAll();
-					};
-
-					$scope.byCategory = function(cat) {
-						$scope.config.category = cat;
-						dbGetAll();
-					};
-
-					$scope.next = function () {
-						$scope.config.offset = $scope.config.offset - $scope.config.count;
-						dbGetAll();
-					};
-
-					$scope.back = function () {
-						$scope.config.offset = $scope.config.count + $scope.config.offset;
-						dbGetAll();
-					};
-
-					// INIT -------------------------------------------
-					dbGetAll();
-				}]);
-
-		})(angular, toastr);
+		require(['all', 'ctrl/page-index'], function () {
+			console.log('Loading complete!');
+			angular.bootstrap(document, ['page-index']);
+		});
 
 	</script>
 }
