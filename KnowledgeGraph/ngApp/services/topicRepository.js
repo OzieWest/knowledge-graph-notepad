@@ -3,11 +3,29 @@
 
 	var name = 'topicRepository';
 	var app = ng.module(name, []);
-	app.factory(name, function ($q, $http, $log) {
-		var ROOT = "http://localhost:55528/api/";
+	
+	app.factory('timestampMarker', ['$log', function ($log) {
+		var timestampMarker = {
+			request: function (config) {
+				$log.info(new Date().toLocaleTimeString(), [config.method, config.url, config]);
+				return config;
+			},
+			response: function (response) {
+				$log.info(new Date().toLocaleTimeString(), ['response', response.config.url, response]);
+				return response;
+			}
+		};
+		return timestampMarker;
+	}]);
+	
+	app.config(['$httpProvider', function ($httpProvider) {
+		$httpProvider.interceptors.push('timestampMarker');
+	}]);
+
+	app.factory(name, function ($q, $http) {
+		var ROOT = "../api/";
 		
 		var call = function (method, params, data) {
-			$log.debug([new Date().toLocaleTimeString(), 'send', params, 'and', data]);
 			var path = ROOT + params;
 			var deferred = $q.defer();
 			var p;
@@ -27,10 +45,8 @@
 
 			p.success(function (result) {
 				deferred.resolve(result);
-				$log.debug([new Date().toLocaleTimeString(), params, 'return', result]);
 			}).error(function (err) {
 				deferred.reject(err);
-				$log.debug([new Date().toLocaleTimeString(), params, 'error', err]);
 			});
 			return deferred.promise;
 		};
