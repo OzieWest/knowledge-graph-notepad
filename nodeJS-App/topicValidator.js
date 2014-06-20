@@ -45,7 +45,7 @@ var topicSchema = {
 		}, 
 		"modified": { 
 			"type":"string", 
-			"required":true,
+			"required":false,
 		}, 
 		"status": { 
 			"type":"string", 

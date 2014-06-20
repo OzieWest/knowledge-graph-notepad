@@ -2,14 +2,14 @@ var _ = require('underscore');
 var topicSchema = require('./topicValidator').topicSchema;
 var linkSchema = require('./topicValidator').linkSchema;
 
-function onError(error){
-	if(error){
+function onError(error) {
+	if(error) {
 		console.log(error);
 		return true;
 	}
 
 	return false;
-}
+};
 
 var db = {};
 var collectionName = '';
@@ -93,18 +93,18 @@ module.exports.getById = getById;
 
 /*	Add entry to collection
 	@topic = Topic class
-	@fn = function(error = array)
+	@fn = function(error, result)
 */
 function addTopic(topic, fn) {
 	var errors = topicSchema.validate(topic);
-
 	if(errors.length != 0){
 		fn(errors);
 	}
 	else {
 		topic.created = new Date().toLocaleString();
+		topic.modified = new Date().toLocaleString();
 		openDb(function (collection){
-			collection.insert(topic, fn(null));
+			collection.insert(topic, { w: 1}, fn);
 		});
 	}
 }
@@ -124,12 +124,11 @@ function updateTopic(id, topic, fn) {
 	else {
 		topic.modified = new Date().toLocaleString();
 
-		openDb(function (collection){
+		openDb(function (collection) {
 			collection.update(
 				{ _id: id }, 
-				{ $set: topic }
+				{ $set: topic }, fn
 			);
-			fn(null, true);
 		});
 	}
 }

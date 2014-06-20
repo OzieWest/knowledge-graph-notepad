@@ -1,12 +1,10 @@
 var _ = require('underscore');
+var bodyParser = require('body-parser');
 var logger = require('morgan');
 var express = require('express');
 var v = require('./topicValidator');
 var repo = require('./topicApiController');
 var mongo = require('mongodb');
-//var fs = require('fs');
-
-//var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var host = '127.0.0.1';
 var port = mongo.Connection.DEFAULT_PORT;
@@ -18,9 +16,10 @@ repo.setCollection('topic');
 var app = express();
 
 app.use(express.static(__dirname + '/public'));
-app.use(logger());
+app.use(logger('dev'));
+app.use(bodyParser.json())
 
-
+// Get all topics ---------------------------------------------------
 app.get('/api/topics', function(req, resp){
 	var query = req.query;
 
@@ -33,30 +32,73 @@ app.get('/api/topics', function(req, resp){
 	repo.getAll(count, offset, fields, category, function(error, array) {
 		db.close();
 		if(error)
-			resp.send(error);
+			resp.send(error, 400);
 		else
-			resp.send(array);
+			resp.send(array, 200);
 	});
 });
 
+// Get topic by ID ---------------------------------------------------
 app.get('/api/topics/:id', function(req, resp){
-	var strId = req.params.id || '';
-	if(strId) {
-		var id = createId(strId);
-		var fields = getFields(req.query.fields);
 
-		repo.getById(id, fields, function(error, array) {
-			db.close();
-			if(error)
-				resp.send(error);
-			else
-				resp.send(array);
-		});
+	var id = createId(req.params.id);
+	if(_.isEmpty(id)) {
+		resp.send({ Message: 'Bad parameter: id' }, 400);
+		return;
 	}
-	else
-		resp.send('Bad response');
+
+	var fields = getFields(req.query.fields);
+
+	repo.getById(id, fields, function(error, result) {
+		db.close();
+
+		if(error) {
+			resp.send(error, 400);
+			return;
+		}
+
+		if(_.isEmpty(result)){
+			resp.send({ Message: 'Not found' }, 404);
+			return;
+		}
+
+		resp.send(result, 200);
+	});
 });
 
+// Add topic ---------------------------------------------------
+app.post('/api/topics', function(req, resp) {
+	var body = req.body;
+
+	repo.addTopic(body, function(error, result) {
+		db.close();
+		if(error)
+			resp.send(error, 400);
+		else
+			resp.send(result, 201);
+	});
+});
+
+// Update topic ---------------------------------------------------
+app.put('/api/topics/:id', function(req, resp) {
+	
+	var id = createId(req.params.id);
+	if(_.isEmpty(id)) {
+		resp.send({ Message: 'Bad parameter: id' }, 400);
+		return;
+	}
+
+	var topic = req.body;
+	repo.updateTopic(id, topic, function(error, result) {
+		db.close();
+		if(error)
+			resp.send(error, 400);
+		else
+			resp.send(result, 200);
+	});		
+});
+
+// ---------------------------------------------------
 app.get('*', function(req, resp){
 	var body = 'Default request!';
 	resp.setHeader('Content-Type', 'text/html');
@@ -147,7 +189,13 @@ var getDate = function(){
 };
 
 var createId = function(stringKey){
-	return new mongo.ObjectID(stringKey);
+	var id = {};
+	try {
+		id = new mongo.ObjectID(stringKey);	
+	}
+	catch (e) {
+	}
+	return id;
 };
 
 var getFields = function(str) {
