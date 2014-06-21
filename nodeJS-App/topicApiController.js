@@ -127,7 +127,9 @@ function updateTopic(id, topic, fn) {
 		openDb(function (collection) {
 			collection.update(
 				{ _id: id }, 
-				{ $set: topic }, fn
+				{ $set: topic },
+				{ w: 1 },
+				fn
 			);
 		});
 	}
@@ -137,7 +139,7 @@ module.exports.updateTopic = updateTopic;
 
 /*	Delete entry from collection
 	@id = mongo Object
-	@fn = function(error, result = int)
+	@fn = function(error, numberRemoved = int)
 */
 function deleteTopic(id, fn){
 	openDb(function (collection){
@@ -188,9 +190,9 @@ function addConnection(firstId, secondId, fn) {
 		var firstQuery = { _id: firstId };
 		var firstAction = { $addToSet: { connections: secondId } };
 		
-		collection.update(firstQuery, firstAction, {}, function(error, result) {
+		collection.update(firstQuery, firstAction, {}, function(error) {
 			if(error)
-				fn(error, result);
+				fn(error, 'schema');
 			else{
 				var secondQuery = { _id: secondId };
 				var secondAction = { $addToSet: { connections: firstId } };
@@ -213,9 +215,9 @@ function deleteConnection(firstId, secondId, fn) {
 		var firstQuery = { _id: firstId };
 		var firstAction = { $pop: { connections: secondId } };
 		
-		collection.update(firstQuery, firstAction, {}, function(error, result) {
+		collection.update(firstQuery, firstAction, {}, function(error) {
 			if(error)
-				fn(error, result);
+				fn(error);
 			else{
 				var secondQuery = { _id: secondId };
 				var secondAction = { $pop: { connections: firstId } };
@@ -235,7 +237,7 @@ module.exports.deleteConnection = deleteConnection;
 function addLink(id, link, fn) {
 	var errors = linkSchema.validate(link);
 	if(errors.length != 0){
-		fn(errors);
+		fn(errors, "schema");
 	}
 	else {
 		openDb(function (collection){
@@ -254,15 +256,10 @@ module.exports.addLink = addLink;
 	@fn = function(error)
 */
 function deleteLink(id, idLink, fn) {
-	if(idLink == 0 || id == 0){
-		fn(errors);
-	}
-	else {
-		openDb(function (collection){
-			var query = { _id: id };
-			var action = { $pull: { 'links': { id: idLink }}};
-			collection.update(query, action, {}, fn);
-		});
-	}
+	openDb(function (collection){
+		var query = { _id: id };
+		var action = { $pull: { 'links': { id: idLink }}};
+		collection.update(query, action, {}, fn);
+	});
 }
 module.exports.deleteLink = deleteLink;
