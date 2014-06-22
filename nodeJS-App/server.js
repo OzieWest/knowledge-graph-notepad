@@ -1,14 +1,18 @@
-var _ = require('underscore');
-var bodyParser = require('body-parser');
-var logger = require('morgan');
-var express = require('express');
-var v = require('./topicValidator');
-var repo = require('./topicApiController');
-var mongo = require('mongodb');
+var _ = require('underscore'),
 
-var host = '127.0.0.1';
-var port = mongo.Connection.DEFAULT_PORT;
-var db = new mongo.Db('for-test', new mongo.Server(host, port, {}));
+	v = require('./topicValidator'),
+	repo = require('./topicApiController'),
+
+	bodyParser = require('body-parser'),
+	logger = require('morgan'),
+	express = require('express'),
+	
+	Db = require('mongodb').Db,
+	Server = require('mongodb').Server,
+	Connection = require('mongodb').Connection;
+	ObjectID = require('mongodb').ObjectID;
+
+var db = new Db('for-test', new Server('127.0.0.1', Connection.DEFAULT_PORT, {}));
 
 repo.setDb(db);
 repo.setCollection('topic');
@@ -45,7 +49,7 @@ app.get('/api/topic/:id', function(req, resp){
 
 	var id = createId(req.params.id);
 	if(_.isEmpty(id)) {
-		resp.send({ Message: 'Bad parameter: id' }, 400);
+		resp.json({ Message: 'Bad parameter: id' }, 400);
 		return;
 	}
 
@@ -55,16 +59,11 @@ app.get('/api/topic/:id', function(req, resp){
 		db.close();
 
 		if(error) {
-			resp.send(error, 400);
+			resp.json(error, 400);
 			return;
 		}
 
-		if(_.isEmpty(result)){
-			resp.send({ Message: 'Not found' }, 404);
-			return;
-		}
-
-		resp.send(result, 200);
+		resp.json(result, 200);
 	});
 });
 
@@ -298,19 +297,18 @@ app.delete('/api/topic/:id/link/:idlink', function(req, resp){
 		idlink = parseInt(req.params.idlink);
 	}
 	catch(e){}
-	
+
 	if(!idlink) {
 		resp.send({ Message: 'Bad parameter: idlink' }, 400);
 		return;
 	}
 
-	repo.deleteLink(id, idlink, function(error, r) {
+	repo.deleteLink(id, idlink, function(error) {
 		db.close();
 		if(error) {
 			resp.send(error, 500);
 			return;
 		}
-		console.log(r);
 
 		resp.send(1, 200);
 	});
@@ -326,81 +324,6 @@ app.get('*', function(req, resp){
 app.listen(3000);
 console.log('Server is running...');
 
-//var id = createId('539d74cfeebbdcc40905b4e0');
-
-/*var id = createId('539d74cfeebbdcc40905b4e0');
-var secondId = createId('539d902a5d2de1182034dd39');
-var thirdId = createId('539d902a5d2de1182034dd37');
-
-{
-"title": "search title",
-"value": "1",
-"category": "1",
-"status": "1",
-"links": [],
-"connections": []
-}
-
-repo.getAll(5, 0, {}, '', function(err, data) {
-
-	_.each(data, function(elm){
-		console.log(elm);
-	});
-	db.close();
-});*/
-
-/*repo.getById(id, {}, function(error, topic){
-	console.log(topic);
-
-	db.close();
-});*/
-
-/*repo.addTopic(topic, function(error){
-	console.log(error);
-	db.close();
-});*/
-
-/*repo.updateTopic(id, topic, function(error, result) {
-	console.log(error, result);
-	db.close();
-});*/
-
-/*repo.deleteTopic(deleteId, function(error, result){
-	console.log(error, result);
-	db.close();
-});*/
-
-/*repo.getTitles([id, createId('539d902a5d2de1182034dd37')], { title: 1 }, function(error, result){
-	console.log(error, result);
-	db.close();
-});*/
-
-/*repo.searchTitle('sea', { title: 1 }, function(error, result) {
-	console.log(error, result);
-	db.close();
-});*/
-
-/*repo.addConnection(id, thirdId, function(error) {
-	console.log(error);
-	db.close();
-});*/
-
-/*repo.deleteConnection(id, thirdId, function(error) {
-	console.log(error);
-	db.close();
-});*/
-
-//var link = { id: 1, type: 'в ожидании', title: 'вики', url: 'http://google.com' };
-/*repo.addLink(id, link, function(error) {
-	console.log(error);
-	db.close();
-});*/
-
-/*repo.deleteLink(id, 1, function(error) {
-	console.log(error);
-	db.close();
-});*/
-
 var getDate = function(){
 	return new Date().toLocaleString();
 };
@@ -408,7 +331,7 @@ var getDate = function(){
 var createId = function(stringKey){
 	var id = {};
 	try {
-		id = new mongo.ObjectID(stringKey);	
+		id = new ObjectID(stringKey);	
 	}
 	catch (e) {
 	}

@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Topic repository tests</title>
+
+	<!-- JQuery 2.11 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	 
+	<!-- Require 2.1.11 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+	 
+	<!-- Underscore 1.60 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+	 
+	<!-- Jasmine 2.0 -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jasmine/2.0.0/jasmine.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jasmine/2.0.0/jasmine-html.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jasmine/2.0.0/boot.js"></script>
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/jasmine/2.0.0/jasmine.css" rel="stylesheet" />
+
+
+</head>
+<body>
+
+	<script type="text/javascript">
+
+		(function () {
+			'use strict';
+
+			describe('Topic repository', function () {
+
+				var root = "http://localhost:3000/api/topic";
+
+				describe('GET /topic', function () {
+
+					it('default call', function (done) {
+						$.ajax({ url: root, type: "GET" }).done(function(res){
+							console.log(res);
+
+							expect(res).toBeDefined();
+							expect(res.length).toEqual(10);
+
+							expect(res[0]._id).toBeDefined();
+							expect(res[0].title).toBeUndefined();
+							expect(res[0].category).toBeUndefined();
+
+						}).always(done);
+					});
+
+					it('count = 5, offset = 2', function (done) {
+						$.ajax({ url: root + '?count=5&offset=2', type: "GET" }).done(function(res){
+
+							expect(res).toBeDefined();
+							expect(res.length).toEqual(5);
+
+							expect(res[0]._id).toBeDefined();
+							expect(res[0].title).toBeUndefined();
+							expect(res[0].category).toBeUndefined();
+
+						}).always(done);
+					});
+
+					it('count = 1, fields = title.category', function (done) {
+						$.ajax({ url: root + '?count=1&fields=title.category', type: "GET" }).done(function(res){
+
+							expect(res).toBeDefined();
+							expect(res.length).toEqual(1);
+
+							expect(res[0]._id).toBeDefined();
+							expect(res[0].title).toBeDefined();
+							expect(res[0].category).toBeDefined();
+
+							expect(res[0].value).toBeUndefined();
+
+						}).always(done);
+					});
+				});
+
+				describe('GET /topic/:id', function () {
+					it('real id = 539d902a5d2de1182034dd31, fields = empty', function (done) {
+						$.ajax({ url: root + '/539d902a5d2de1182034dd31', type: "GET" }).done(function(res){
+
+							expect(res).toBeDefined();
+
+							expect(res._id).toEqual('539d902a5d2de1182034dd31');
+							expect(res.title).toBeUndefined();
+							expect(res.category).toBeUndefined();
+							expect(res.value).toBeUndefined();
+							expect(res.status).toBeUndefined();
+							expect(res.connections).toBeUndefined();
+							expect(res.links).toBeUndefined();
+							expect(res.created).toBeUndefined();
+							expect(res.modified).toBeUndefined();
+
+						}).always(done);
+					});
+
+					it('real id = 539d902a5d2de1182034dd31, fields = title.category', function (done) {
+						$.ajax({ url: root + '/539d902a5d2de1182034dd31?fields=title.category', type: "GET" }).done(function(res){
+
+							expect(res).toBeDefined();
+
+							expect(res._id).toEqual('539d902a5d2de1182034dd31');
+							expect(res.title).toBeDefined();
+							expect(res.category).toBeDefined();
+
+							expect(res.value).toBeUndefined();
+							expect(res.status).toBeUndefined();
+							expect(res.connections).toBeUndefined();
+							expect(res.links).toBeUndefined();
+							expect(res.created).toBeUndefined();
+							expect(res.modified).toBeUndefined();
+
+						}).always(done);
+					});
+
+					it('wrong id = 539d902a5d2de1182034dd21, fields = empty', function (done) {
+						$.ajax({ url: root + '/539d902a5d2de1182034dd21', type: "GET" }).done(function(res){
+
+							expect(res).toEqual(null);
+
+						}).always(done);
+					});
+
+					it('bad id = asd, fields = empty', function (done) {
+						$.ajax({ url: root + '/asd', type: "GET" }).fail(function(res){
+
+							expect(res.status).toEqual(400);
+
+						}).always(done);
+					});
+				});
+
+			});
+		})();
+
+	</script>
+</body>
+</html>
